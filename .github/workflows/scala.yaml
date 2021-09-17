@@ -14,9 +14,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Run tests
-        run: sbt coverage test
-        with:
-          fail_ci_if_error: true
+        run: sbt test
   format:
     runs-on: ubuntu-latest
     steps:
