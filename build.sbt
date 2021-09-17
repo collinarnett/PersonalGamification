@@ -7,8 +7,8 @@ lazy val root = project
     version := "0.1.0",
     scalaVersion := scala3Version,
     libraryDependencies ++= Seq(
-      "com.novocode" % "junit-interface" % "0.11" % "test",
+      "org.scalatest" %% "scalatest" % "3.2.9" % Test,
       "com.fasterxml.jackson.module" % "jackson-module-scala_2.13" % "2.12.5",
-      "com.fasterxml.jackson.core" % "jackson-databind" % "2.12.5",
+      "com.fasterxml.jackson.core" % "jackson-databind" % "2.12.5"
     )
   )
