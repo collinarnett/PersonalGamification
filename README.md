@@ -1,6 +1,6 @@
 # PersonalGamification
 
-![example workflow](https://github.com/collinarnett/PersonalGamification/actions/workflows/main.yml/badge.svg)
+[![PersonalGamificationTests](https://github.com/collinarnett/PersonalGamification/actions/workflows/main.yaml/badge.svg?branch=main)](https://github.com/collinarnett/PersonalGamification/actions/workflows/main.yaml)
 
 I thought this would be a fun project to teach myself scala.
 
