@@ -8,25 +8,24 @@ on:
     branches:
       - master
       - dev
-  jobs:
-    test:
-      runs-on: ubuntu-latest
-      steps:
-        - uses: actions/checkout@v2
-        - name: Run tests
-          run: sbt coverage test
-          with:
-            fail_ci_if_error: true
-
-    format:
-      runs-on: ubuntu-latest
-      steps:
-        - uses: actions/checkout@v2
-        - name: Format code
-          run: sbt scalafmtAll     
-    lint:
-      runs-on: ubuntu-latest
-      steps:
-        - uses: actions/checkout@v2
-        - name: Formatting
-          run: sbt scalafmtSbtCheck scalafmtCheck Test/scalafmtCheck
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Run tests
+        run: sbt coverage test
+        with:
+          fail_ci_if_error: true
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Format code
+        run: sbt scalafmtAll
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Formatting
+        run: sbt scalafmtSbtCheck scalafmtCheck Test/scalafmtCheck
