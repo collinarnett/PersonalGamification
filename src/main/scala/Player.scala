@@ -1,7 +1,8 @@
 import scala.compiletime.ops.string
-import com.fasterxml.jackson.databind.json.JsonMapper
 import com.fasterxml.jackson.module.scala.DefaultScalaModule
+import com.fasterxml.jackson.dataformat.yaml.YAMLMapper
 import java.io.File
+
 case class AbilityScores(
     strength: Int = 0,
     dexterity: Int = 0,
@@ -41,11 +42,11 @@ case class Player(
     println(s"$name completed task ${task.name}")
 
   def save(filename: String) =
-    val mapper = JsonMapper.builder().addModule(DefaultScalaModule).build()
+    val mapper = YAMLMapper.builder().addModule(DefaultScalaModule).build()
     mapper.writeValue(new File(filename), this)
 
   def load(filename: String): Player =
-    val mapper = JsonMapper.builder().addModule(DefaultScalaModule).build()
+    val mapper = YAMLMapper.builder().addModule(DefaultScalaModule).build()
     mapper.readValue(new File(filename), classOf[Player])
 
 }

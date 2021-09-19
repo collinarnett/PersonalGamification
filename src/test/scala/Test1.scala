@@ -3,7 +3,7 @@ import java.io.File
 
 class PersonalGamificationTests extends AnyFunSuite:
 
-  val file = "test.player"
+  val file = "test.yml"
 
   test("save should create a file") {
     val player1 = Player()
