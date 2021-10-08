@@ -52,3 +52,5 @@ website/.cache-loader
 project/metals.sbt
 coursier
 .vscode
+.yaml
+.yml
