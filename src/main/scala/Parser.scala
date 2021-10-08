@@ -16,7 +16,7 @@ sealed trait ArgumentType {
 }
 case class StringArgument(
     string: String
-) extends ArgumentType 
+) extends ArgumentType
 
 case class BooleanArgument(
     bool: Boolean

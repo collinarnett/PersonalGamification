@@ -61,5 +61,4 @@ case class Player(
     println(s"$name completed task ${task.name}")
 }
 
-object Player {
-}
+object Player {}
