@@ -1,3 +1,6 @@
-@main def main(task: String, filename: String) =
-  var me = Player(task)
-  me.save(filename)
+@main def main(args: String*) =
+  val params = ArgumentParser.parseArguments(args)
+  val taskFile = params("taskFile")
+  val playerFile = params("playerFile")
+  val player = Player(playerFile.toString)
+  val task = Task(taskFile.toString)

@@ -2,6 +2,7 @@ import scala.compiletime.ops.string
 import com.fasterxml.jackson.module.scala.DefaultScalaModule
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper
 import java.io.File
+import scala.language.implicitConversions
 
 case class AbilityScores(
     strength: Int = 0,
@@ -11,19 +12,38 @@ case class AbilityScores(
     wisdom: Int = 0,
     charisma: Int = 0
 ) {
-  def +(abilityScores: AbilityScores): AbilityScores = {
+
+  def +(abilityScores: AbilityScores): AbilityScores =
     AbilityScores(
-      strength = strength + abilityScores.strength,
-      dexterity = dexterity + abilityScores.dexterity,
-      constitution = constitution + abilityScores.constitution,
-      intelligence = intelligence + abilityScores.intelligence,
-      wisdom = wisdom + abilityScores.wisdom,
-      charisma = charisma + abilityScores.charisma
+      strength + abilityScores.strength,
+      dexterity + abilityScores.dexterity,
+      constitution + abilityScores.constitution,
+      intelligence + abilityScores.intelligence,
+      wisdom + abilityScores.wisdom,
+      charisma + abilityScores.charisma
     )
-  }
 }
 
-case class Task(name: String, abilityScores: AbilityScores)
+sealed trait GameObject {
+  private val mapper =
+    YAMLMapper.builder().addModule(DefaultScalaModule).build()
+  def save(filename: String): Unit =
+    mapper.writeValue(new File(filename), this)
+  def load(filename: String): GameObject =
+    mapper.readValue(new File(filename), this.getClass)
+}
+
+case class Task(
+    name: String = "",
+    description: String = "",
+    abilityScores: AbilityScores = AbilityScores()
+) extends GameObject {
+  def this(
+      filename: ArgumentType
+  )(implicit conv: Conversion[ArgumentType, String]) =
+    this()
+    load(filename.toString)
+}
 
 case class Player(
     name: String = "Trexd",
@@ -31,22 +51,14 @@ case class Player(
     exp: Double = 0.0,
     health: Int = 100,
     var abilityScores: AbilityScores = AbilityScores()
-) {
-
+) extends GameObject {
+  given Conversion[ArgumentType, String] = _.toString
   def this(filename: String) =
     this()
     load(filename)
-
   def completeTask(task: Task) =
     this.abilityScores += task.abilityScores
     println(s"$name completed task ${task.name}")
-
-  def save(filename: String) =
-    val mapper = YAMLMapper.builder().addModule(DefaultScalaModule).build()
-    mapper.writeValue(new File(filename), this)
-
-  def load(filename: String): Player =
-    val mapper = YAMLMapper.builder().addModule(DefaultScalaModule).build()
-    mapper.readValue(new File(filename), classOf[Player])
-
 }
+
+object Player {}
