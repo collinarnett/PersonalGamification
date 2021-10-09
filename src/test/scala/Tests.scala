@@ -20,18 +20,6 @@ class PersonalGamificationSpec extends AnyFlatSpec with should.Matchers:
     (player2 == player1) should be(true)
   }
 
-  "A Task" should "save a Task object" in {
-    val task1 = Task()
-    task1.save(taskFile)
-    File(taskFile).exists should be(true)
-  }
-
-  it should "load a Task object" in {
-    val task1 = Task()
-    val task2 = task1.load(taskFile)
-    (task2 == task1) should be(true)
-  }
-
   "ArgumentParser" should "load commandline arguments" in {
     val args = Seq("--task-file", taskFile, "--player-file", playerFile)
     val params = ArgumentParser.parseArguments(args)
