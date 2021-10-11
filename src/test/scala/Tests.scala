@@ -5,13 +5,13 @@ import matchers._
 
 class PersonalGamificationSpec extends AnyFlatSpec with should.Matchers:
 
-  val playerFile = "player.yml"
-  val taskFile = "task.yml"
+  val playerFile = File("player.yml")
+  val taskFile = File("task.yml")
 
   "A Player" should "save a Player object" in {
     val player1 = Player()
     player1.save(playerFile)
-    File(playerFile).exists should be(true)
+    playerFile.exists should be(true)
   }
 
   it should "load a Player object" in {
@@ -20,16 +20,6 @@ class PersonalGamificationSpec extends AnyFlatSpec with should.Matchers:
     (player2 == player1) should be(true)
   }
 
-  "ArgumentParser" should "load commandline arguments" in {
-    val args = Seq("--task-file", taskFile, "--player-file", playerFile)
-    val params = ArgumentParser.parseArguments(args)
-    val correctParams = Map(
-      "taskFile" -> StringArgument(taskFile),
-      "playerFile" -> StringArgument(playerFile)
-    )
-    (params == correctParams) should be(true)
-  }
-
   // Delete testing file(s)
-  File(playerFile).deleteOnExit()
-  File(taskFile).deleteOnExit()
+  playerFile.deleteOnExit()
+  taskFile.deleteOnExit()

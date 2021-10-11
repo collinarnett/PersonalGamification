@@ -13,7 +13,7 @@ case class AbilityScores(
     charisma: Int = 0
 ) {
 
-  def +=(abilityScores: AbilityScores): AbilityScores =
+  def +(abilityScores: AbilityScores): AbilityScores =
     AbilityScores(
       strength + abilityScores.strength,
       dexterity + abilityScores.dexterity,
@@ -27,32 +27,36 @@ case class AbilityScores(
 sealed trait GameObject {
   private val mapper =
     YAMLMapper.builder().addModule(DefaultScalaModule).build()
-  def save(filename: String): Unit =
-    mapper.writeValue(new File(filename), this)
-  def load(filename: String): GameObject =
-    mapper.readValue(new File(filename), this.getClass)
+  def save(file: File): Unit =
+    mapper.writeValue(file, this)
+  def load(file: File): GameObject =
+    mapper.readValue(file, this.getClass)
 }
 
-case class Task(name: String, description: String, abilityScores: AbilityScores)
+case class Task(
+    name: String = "",
+    description: String = "",
+    abilityScores: AbilityScores = AbilityScores()
+)
 
 case class Player(
-    name: String = "Trexd",
+    file: File = File("player.yaml"),
+    name: String = "Player",
     level: Int = 0,
     exp: Double = 0.0,
     health: Int = 100,
     val abilityScores: AbilityScores = AbilityScores()
 ) extends GameObject {
-  given Conversion[ArgumentType, String] = _.toString
-  def this(filename: String) =
+  def this(file: File) =
     this()
-    load(filename)
+    load(file)
   def completeTask(task: Task) =
-    println(s"$name completed task ${task.name}")
     Player(
+      this.file,
       this.name,
       this.level,
       this.exp,
       this.health,
-      this.abilityScores += task.abilityScores
+      this.abilityScores + task.abilityScores
     )
 }
