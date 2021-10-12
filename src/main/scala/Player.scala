@@ -22,6 +22,16 @@ case class AbilityScores(
       wisdom + abilityScores.wisdom,
       charisma + abilityScores.charisma
     )
+  override def toString() =
+    s"""
+    |  strength    : $strength
+    |  dexterity   : $dexterity
+    |  constitution: $constitution
+    |  intelligence: $intelligence
+    |  wisdom      : $wisdom
+    |  charisma    : $charisma
+    |---------------------
+    """
 }
 
 sealed trait GameObject {
@@ -43,7 +53,7 @@ case class Player(
     file: File = File("player.yaml"),
     name: String = "Player",
     level: Int = 0,
-    exp: Double = 0.0,
+    exp: Float = 0.0,
     health: Int = 100,
     val abilityScores: AbilityScores = AbilityScores()
 ) extends GameObject {
@@ -59,4 +69,17 @@ case class Player(
       this.health,
       this.abilityScores + task.abilityScores
     )
+  override def toString() =
+    s"""
+    |------ Status -------
+    |  name   : $name
+    |  level  : $level
+    |  exp    : ${exp * 100}%
+    |  health : ($health/100)
+    |---------------------
+    |-- Ability Scores ---
+    |$abilityScores
+
+    """
+
 }
