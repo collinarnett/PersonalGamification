@@ -3,6 +3,7 @@ import com.fasterxml.jackson.module.scala.DefaultScalaModule
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper
 import java.io.File
 import scala.language.implicitConversions
+import com.fasterxml.jackson.module.scala.experimental.ScalaObjectMapper
 
 case class AbilityScores(
     strength: Int = 0,
@@ -23,15 +24,13 @@ case class AbilityScores(
       charisma + abilityScores.charisma
     )
   override def toString() =
-    s"""
-    |  strength    : $strength
-    |  dexterity   : $dexterity
-    |  constitution: $constitution
-    |  intelligence: $intelligence
-    |  wisdom      : $wisdom
-    |  charisma    : $charisma
-    |---------------------
-    """
+    s"""strength    : $strength
+    |dexterity   : $dexterity
+    |constitution: $constitution
+    |intelligence: $intelligence
+    |wisdom      : $wisdom
+    |charisma    : $charisma
+    |---------------------""".stripMargin
 }
 
 sealed trait GameObject {
@@ -46,7 +45,8 @@ sealed trait GameObject {
 case class Task(
     name: String = "",
     description: String = "",
-    abilityScores: AbilityScores = AbilityScores()
+    abilityScores: AbilityScores = AbilityScores(),
+    difficulty: Int = 0
 )
 
 case class Player(
@@ -70,16 +70,13 @@ case class Player(
       this.abilityScores + task.abilityScores
     )
   override def toString() =
-    s"""
-    |------ Status -------
-    |  name   : $name
-    |  level  : $level
-    |  exp    : ${exp * 100}%
-    |  health : ($health/100)
+    s"""------ Status -------
+    |name   : $name
+    |level  : $level
+    |exp    : ${exp * 100}%
+    |health : ($health/100)
     |---------------------
-    |-- Ability Scores ---
-    |$abilityScores
-
-    """
+    |--- Ability Scores --
+    |$abilityScores""".stripMargin
 
 }

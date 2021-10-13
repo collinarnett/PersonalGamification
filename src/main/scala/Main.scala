@@ -5,6 +5,7 @@ import scopt.OParser
 import java.io.FileNotFoundException
 import java.io.IOException
 import java.nio.file.FileAlreadyExistsException
+import com.fasterxml.jackson.core.`type`.TypeReference
 
 val mapper = YAMLMapper.builder().addModule(DefaultScalaModule).build()
 
@@ -13,10 +14,11 @@ case class Config(
     init: Boolean = false,
     playerFile: File = File("player.yaml"),
     tasksFile: File = File("tasks.yaml"),
-    completed: Seq[String] = Seq()
+    complete: Seq[String] = Seq()
 )
 
 def run(config: Config): Player =
+  println("-------- Log ---------")
   val player: Player =
     if config.init then
       val blankPlayer = Player()
@@ -35,11 +37,11 @@ def run(config: Config): Player =
       else
         mapper.writeValue(config.tasksFile, Seq(blankTask))
         Seq(blankTask)
-    else mapper.readValue(config.tasksFile, classOf[Seq[Task]])
+    else mapper.readValue(config.tasksFile, new TypeReference[Seq[Task]]() {})
 
   if config.status then println(player)
-  val completed = config.completed
-  Game(player, tasks, completed)
+  val complete = config.complete
+  Game(player, tasks, complete)
 
 @main def main(args: String*) =
 
@@ -133,11 +135,11 @@ def run(config: Config): Player =
             )
             .action((x, c) => c.copy(tasksFile = x))
             .text("Location of your tasks file (eg. tasks.yaml)."),
-          opt[Seq[String]]('c', "completed")
+          opt[Seq[String]]('c', "complete")
             .valueName("task1, task2...")
             .minOccurs(1)
-            .action((x, c) => c.copy(completed = x))
-            .text("Tasks to be completed.")
+            .action((x, c) => c.copy(complete = x))
+            .text("Tasks to complete.")
         ),
       help("help")
     )
@@ -148,3 +150,6 @@ def run(config: Config): Player =
     case _            =>
   player match
     case p: Player => p.save(p.file)
+  println("---------------------")
+  println(player)
+  println("See you tomorrow.\n")
