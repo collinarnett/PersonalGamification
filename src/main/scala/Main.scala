@@ -1,13 +1,7 @@
-import com.fasterxml.jackson.dataformat.yaml.YAMLMapper
-import com.fasterxml.jackson.module.scala.DefaultScalaModule
 import java.io.File
 import scopt.OParser
-import java.io.FileNotFoundException
-import java.io.IOException
-import java.nio.file.FileAlreadyExistsException
-import com.fasterxml.jackson.core.`type`.TypeReference
-
-val mapper = YAMLMapper.builder().addModule(DefaultScalaModule).build()
+import scala.util.Success
+import scala.util.Failure
 
 case class Config(
     status: Boolean = false,
@@ -17,31 +11,23 @@ case class Config(
     complete: Seq[String] = Seq()
 )
 
-def run(config: Config): Player =
-  println("-------- Log ---------")
-  val player: Player =
-    if config.init then
-      val blankPlayer = Player()
-      if config.playerFile.exists then
-        throw new FileAlreadyExistsException(config.playerFile.getPath)
-      else
-        blankPlayer.save(config.playerFile)
-        blankPlayer
-    else Player(config.playerFile)
+def run(config: Config) =
+  val quest: Quest = Quest().load(config.tasksFile) match
+    case Success(q) => q
+    case Failure(e) =>
+      println(s"Failed. Reason: $e")
+      Quest()
 
-  val tasks: Seq[Task] =
-    if config.init then
-      val blankTask = Task()
-      if config.tasksFile.exists then
-        throw new FileAlreadyExistsException(config.tasksFile.getPath)
-      else
-        mapper.writeValue(config.tasksFile, Seq(blankTask))
-        Seq(blankTask)
-    else mapper.readValue(config.tasksFile, new TypeReference[Seq[Task]]() {})
+  val player: Player = Player().load(config.tasksFile) match
+    case Success(p) => p
+    case Failure(e) =>
+      println(s"Failed. Reason: $e")
+      Player()
 
-  if config.status then println(player)
-  val complete = config.complete
-  Game(player, tasks, complete)
+  if config.status then println(player.string)
+  if config.init then
+    quest.save(config.tasksFile)
+    player.save(config.playerFile)
 
 @main def main(args: String*) =
 
@@ -64,31 +50,10 @@ def run(config: Config): Player =
         .children(
           opt[File]('p', "player-file")
             .optional()
-            .validate(x =>
-              try
-                mapper.writeValue(x, classOf)
-                x.delete()
-                success
-              catch
-                case e: IOException =>
-                  failure(s"Unable to create a file at ${x.getPath}:\n$e")
-                case e: Exception => failure(s"Failed to create file:\n$e")
-            )
             .valueName("<player-file>.yaml")
             .action((x, c) => c.copy(playerFile = x))
             .text("Location of your player file (eg. tasks.yaml)."),
           opt[File]('t', "task-file")
-            .optional()
-            .validate(x =>
-              try
-                mapper.writeValue(x, classOf)
-                x.delete()
-                success
-              catch
-                case e: IOException =>
-                  failure(s"Unable to create a file at ${x.getPath}:\n$e")
-                case e: Exception => failure(s"Failed to create file:\n$e")
-            )
             .valueName("<task-file>.yaml")
             .action((x, c) => c.copy(playerFile = x))
             .text("Location of your player file (eg. tasks.yaml).")
@@ -97,47 +62,15 @@ def run(config: Config): Player =
         .children(
           opt[File]('p', "player-file")
             .valueName("<player-file>.yaml")
-            .validate(x =>
-              try
-                if mapper
-                    .readValue(x, classOf[Player])
-                    .isInstanceOf[Player]
-                then success
-                else
-                  failure(
-                    s"Player cannot be loaded in file ${x.getPath}" +
-                      s"\nPlease check the file's formatting."
-                  )
-              catch
-                case e: IOException =>
-                  failure(s"Unable to create player file at ${x.getPath}:\n$e")
-                case e: Exception => failure(s"Failed to create file:\n$e")
-            )
             .action((x, c) => c.copy(playerFile = x))
             .text("Location of your player file (eg. tasks.yaml)."),
           opt[File]('t', "tasks-file")
             .valueName("<taks-file>.yaml")
-            .validate(x =>
-              try
-                if mapper
-                    .readValue(x, classOf[Seq[Task]])
-                    .isInstanceOf[Seq[Task]]
-                then success
-                else
-                  failure(
-                    s"Player cannot be loaded in file ${x.getPath}" +
-                      s"\nPlease check the file's formatting."
-                  )
-              catch
-                case e: IOException =>
-                  failure(s"Unable to create tasks file at ${x.getPath}:\n$e")
-                case e: Exception => failure(s"Failed to create file:\n$e")
-            )
             .action((x, c) => c.copy(tasksFile = x))
             .text("Location of your tasks file (eg. tasks.yaml)."),
           opt[Seq[String]]('c', "complete")
+            .optional()
             .valueName("task1, task2...")
-            .minOccurs(1)
             .action((x, c) => c.copy(complete = x))
             .text("Tasks to complete.")
         ),
@@ -145,11 +78,7 @@ def run(config: Config): Player =
     )
 
   }
-  val player = OParser.parse(parser, args, Config()) match
+
+  OParser.parse(parser, args, Config()) match
     case Some(config) => run(config)
     case _            =>
-  player match
-    case p: Player => p.save(p.file)
-  println("---------------------")
-  println(player)
-  println("See you tomorrow.\n")

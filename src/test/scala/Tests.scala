@@ -13,16 +13,14 @@ class PersonalGamificationSpec extends AnyFlatSpec with should.Matchers:
     val player1 = Player()
     player1.save(playerFile)
     val hasBeenSaved = playerFile.exists
-    // Delete testing file(s)
     playerFile.delete()
     hasBeenSaved should be(true)
   }
 
   it should "load a Player object" in {
-    val player1 = Player(playerFile)
+    val player1 = Player()
     player1.save(playerFile)
-    val player2 = Player(playerFile)
-    // Delete testing file(s)
+    val player2 = Player()
     playerFile.delete()
     (player2 == player1) should be(true)
   }
@@ -35,4 +33,15 @@ class PersonalGamificationSpec extends AnyFlatSpec with should.Matchers:
     taskFile.delete()
     haveBeenCreated should be(true)
 
+  }
+
+  // TODO refactor to use player test files
+  it should "complete tasks" in {
+    main(
+      s"init --player-file ${playerFile.getAbsolutePath} --tasks-file ${taskFile.getAbsolutePath}"
+    )
+    val args = "play --complete task1"
+    main(args)
+    playerFile.delete()
+    taskFile.delete()
   }
