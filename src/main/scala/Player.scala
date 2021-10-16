@@ -5,8 +5,9 @@ import scala.io.StdIn.{readChar, readInt}
 import java.io.{FileNotFoundException, IOException}
 import scala.util.{Try, Success, Random}
 import com.fasterxml.jackson.core.`type`.TypeReference
-
-val r = scala.util.Random
+import com.fasterxml.jackson.module.scala.ClassTagExtensions
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
 object UI {
   def yesNoPrompt(): Boolean =
@@ -57,7 +58,7 @@ case class AbilityScores(
   def sum: Int =
     strength + dexterity + constitution + intelligence + wisdom + charisma
 
-  def print() =
+  def string =
     s"""strength    : $strength
     |dexterity   : $dexterity
     |constitution: $constitution
@@ -68,7 +69,8 @@ case class AbilityScores(
 
 sealed trait GameObject {
   private val mapper =
-    YAMLMapper.builder().addModule(DefaultScalaModule).build()
+    new YAMLMapper() with ClassTagExtensions
+  mapper.registerModule(DefaultScalaModule)
   def save(file: File): Unit =
     if file.exists then
       println(
@@ -76,31 +78,27 @@ sealed trait GameObject {
       )
       UI.yesNoPrompt()
       mapper.writeValue(file, this)
-
-  def load[A <: GameObject](file: File): Try[A] =
-    Try(mapper.readValue(file, new TypeReference[A]() {}))
 }
 
 case class Task(
     name: String = "",
     description: String = "",
+    dueDate: String = "",
     difficulty: Int = 0,
-    completed: Boolean = false,
     abilityScores: AbilityScores = AbilityScores()
 )
 
 case class Quest(tasks: Seq[Task] = Seq(Task())) extends GameObject {
-  private def abilityScores = for task <- tasks yield task.abilityScores
-  def exp = abilityScores.foldLeft(AbilityScores())(_ + _).sum
-  def gold = tasks.length * r.nextInt(10) * tasks.map(_.difficulty).sum
-}
+  private def afterNow(dd: String): Boolean =
+    LocalDateTime.now().isAfter(LocalDateTime.parse(dd, formatter))
+  def exp: Float =
+    val f = (t: Task) =>
+      if afterNow(t.dueDate) then -t.abilityScores.sum
+      else t.abilityScores.sum {
+        for task <- tasks yield f(task)
+      }.sum * r.nextFloat
+  def gold: Int = tasks.length * r.nextInt(10) * tasks.map(_.difficulty).sum
 
-abstract class Creature extends GameObject {
-  def name: String
-  def level: Int
-  def exp: Float
-  def health: Int
-  def abilityScores: AbilityScores
 }
 
 case class Player(
@@ -109,7 +107,7 @@ case class Player(
     exp: Float = 0.0,
     health: Int = 100,
     val abilityScores: AbilityScores = AbilityScores()
-) extends Creature {
+) extends GameObject {
   def completeQuest(exp: Float): Player =
     Player(name, level, this.exp + exp, health, abilityScores)
 
@@ -120,6 +118,6 @@ case class Player(
     |exp    : ${exp * 100}%
     |health : ($health/100)
     |--- Ability Scores --
-    |$abilityScores
+    |${abilityScores.string}
     |""".stripMargin
 }

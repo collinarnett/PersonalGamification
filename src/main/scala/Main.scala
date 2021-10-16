@@ -2,6 +2,17 @@ import java.io.File
 import scopt.OParser
 import scala.util.Success
 import scala.util.Failure
+import scala.util.Try
+import com.fasterxml.jackson.dataformat.yaml.YAMLMapper
+import com.fasterxml.jackson.module.scala.ClassTagExtensions
+import com.fasterxml.jackson.module.scala.DefaultScalaModule
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
+
+val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
+def afterNow(dd: String): Boolean =
+  LocalDateTime.now().isAfter(LocalDateTime.parse(dd, formatter))
+val r = scala.util.Random
 
 case class Config(
     status: Boolean = false,
@@ -12,25 +23,50 @@ case class Config(
 )
 
 def run(config: Config) =
-  val quest: Quest = Quest().load(config.tasksFile) match
+
+  val mapper = new YAMLMapper() with ClassTagExtensions
+  mapper.registerModule(DefaultScalaModule)
+  val quest: Quest = Try { mapper.readValue[Quest](config.tasksFile) } match
     case Success(q) => q
     case Failure(e) =>
       println(s"Failed. Reason: $e")
       Quest()
 
-  val player: Player = Player().load(config.tasksFile) match
+  val player: Player = Try { mapper.readValue[Player](config.playerFile) } match
     case Success(p) => p
     case Failure(e) =>
       println(s"Failed. Reason: $e")
       Player()
 
   if config.status then println(player.string)
-  if config.init then
+  else if config.init then
     quest.save(config.tasksFile)
     player.save(config.playerFile)
+  else
+    val completed =
+      Quest(for
+        task <- quest.tasks
+        taskName <- config.complete
+        if (task.name == taskName)
+      yield task)
+    val unfinished =
+      Quest(for
+        task <- quest.tasks
+        taskName <- config.complete
+        if (task.name != taskName) && !afterNow(task.dueDate)
+      yield task)
+
+    println(completed)
+    val updatedPlayer = player.completeQuest(completed.exp)
+    println(updatedPlayer.string)
+    println("Would you like to save your progress?")
+    if UI.yesNoPrompt() then
+      updatedPlayer.save(config.playerFile)
+      unfinished.tasks match
+        case Seq() => Quest().save(config.tasksFile)
+        case _     => unfinished.save(config.tasksFile)
 
 @main def main(args: String*) =
-
   val builder = OParser.builder[Config]
   val parser = {
     import builder._

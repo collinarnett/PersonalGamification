@@ -34,14 +34,3 @@ class PersonalGamificationSpec extends AnyFlatSpec with should.Matchers:
     haveBeenCreated should be(true)
 
   }
-
-  // TODO refactor to use player test files
-  it should "complete tasks" in {
-    main(
-      s"init --player-file ${playerFile.getAbsolutePath} --tasks-file ${taskFile.getAbsolutePath}"
-    )
-    val args = "play --complete task1"
-    main(args)
-    playerFile.delete()
-    taskFile.delete()
-  }
