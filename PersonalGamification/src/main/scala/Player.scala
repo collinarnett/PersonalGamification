@@ -92,9 +92,9 @@ case class Quest(tasks: Seq[Task] = Seq(Task())) extends GameObject {
   private def afterNow(dd: String): Boolean =
     LocalDateTime.now().isAfter(LocalDateTime.parse(dd, formatter))
   def exp: Float =
-    val f = (t: Task) =>
+    val f: Float = (t: Task) =>
       if afterNow(t.dueDate) then -t.abilityScores.sum
-      else t.abilityScores.sum {
+      else t.abilityScores.sum + {
         for task <- tasks yield f(task)
       }.sum * r.nextFloat
   def gold: Int = tasks.length * r.nextInt(10) * tasks.map(_.difficulty).sum
