@@ -53,3 +53,7 @@ project/metals.sbt
 coursier
 .vscode
 *.pyz
+player.yaml
+tasks.yaml
+out/
+.direnv
