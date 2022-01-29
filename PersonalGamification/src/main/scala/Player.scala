@@ -9,24 +9,6 @@ import com.fasterxml.jackson.module.scala.ClassTagExtensions
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
-object UI {
-  def yesNoPrompt(): Boolean =
-    val input = readChar()
-    input match
-      case 'Y' => true
-      case 'y' => true
-      case 'N' => false
-      case 'n' => false
-      case _   => yesNoPrompt()
-
-  def listPrompt[A](list: Seq[A]): A =
-    println(s"Please choose from the list below")
-    for item <- list yield println(item)
-    val input = readInt()
-    if input > list.length then list(input)
-    else listPrompt(list)
-}
-
 case class AbilityScores(
     strength: Int = 0,
     dexterity: Int = 0,
@@ -88,19 +70,6 @@ case class Task(
     abilityScores: AbilityScores = AbilityScores()
 )
 
-case class Quest(tasks: Seq[Task] = Seq(Task())) extends GameObject {
-  private def afterNow(dd: String): Boolean =
-    LocalDateTime.now().isAfter(LocalDateTime.parse(dd, formatter))
-  def exp: Float =
-    val f: Float = (t: Task) =>
-      if afterNow(t.dueDate) then -t.abilityScores.sum
-      else t.abilityScores.sum + {
-        for task <- tasks yield f(task)
-      }.sum * r.nextFloat
-  def gold: Int = tasks.length * r.nextInt(10) * tasks.map(_.difficulty).sum
-
-}
-
 case class Player(
     name: String = "Player",
     level: Int = 0,
@@ -108,7 +77,7 @@ case class Player(
     health: Int = 100,
     val abilityScores: AbilityScores = AbilityScores()
 ) extends GameObject {
-  def completeQuest(exp: Float): Player =
+  def completeTask(exp: Float): Player =
     Player(name, level, this.exp + exp, health, abilityScores)
 
   def string: String =
