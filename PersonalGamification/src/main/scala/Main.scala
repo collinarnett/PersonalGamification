@@ -16,7 +16,7 @@ val r = scala.util.Random
 
 case class Config(
     status: Boolean = false,
-    init: Boolean = false,
+    list: Boolean = false,
     playerFile: File = File("player.yaml"),
     tasksToDo: Seq[File] = Seq(),
     done: Seq[String] = Seq()
@@ -33,26 +33,27 @@ case class Config(
         "0.1.0",
         "https://github.com/collinarnett/PersonalGamification"
       ),
-      opt[Unit]('s', "status")
+      opt[Unit]("status")
         .action((_, c) => c.copy(status = true))
         .text("Display your player status."),
-      cmd("init")
-        .text("Initialize a new blank character and task sheet.")
-        .action((_, c) => c.copy(init = true))
-        .children(
-          opt[File]('p', "player-file")
-            .optional()
-            .valueName("<player-file>.yaml")
-            .action((x, c) => c.copy(playerFile = x))
-            .text("Location of your player file (eg. tasks.yaml)."),
-        ),
+      opt[File]("player")
+        .action((x, c) => c.copy(playerFile = x)),
       opt[Seq[File]]("add")
         .action((x, c) => c.copy(tasksToDo = x)),
+      opt[Unit]("list")
+        .action((_, c) => c.copy(list = true)),
       opt[Seq[String]]("done")
         .action((x, c) => c.copy(done = x))
       )
   }
 
   OParser.parse(parser, args, Config()) match
-    case Some(config) => 
-    case _            =>
+    case Some(config) => parseFile(config)
+    case _ => None
+
+
+private def parseFile(config: Config): Option[Player] = 
+  val mapper = YAMLMapper.builder().addModule(DefaultScalaModule).build()
+  config.playerFile match
+    case Some(file) => mapper.readValue(file, Player)
+    case None => None
