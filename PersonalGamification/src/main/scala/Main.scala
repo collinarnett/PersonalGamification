@@ -53,7 +53,21 @@ case class Config(
 
 
 private def parseFile(config: Config): Option[Player] = 
-  val mapper = YAMLMapper.builder().addModule(DefaultScalaModule).build()
-  config.playerFile match
-    case Some(file) => mapper.readValue(file, Player)
-    case None => None
+  val mapper = new YAMLMapper() with ClassTagExtensions
+  mapper.registerModule(DefaultScalaModule)
+  Try { mapper.readValue[Player](config.playerFile) } match
+      case Success(p) => Some(p)
+      case Failure(e) =>
+        println(s"Failed to load player file. Reason: $e")
+        None
+
+private def parseTasks(config: Config): Seq[Option[Task]] =
+  val mapper = new YAMLMapper() with ClassTagExtensions
+  mapper.registerModule(DefaultScalaModule)
+  for ((task: File) <- config.tasksToDo) yield
+    Try { mapper.readValue[Task](task) } match
+        case Success(t) => Some(t)
+        case Failure(e) =>
+          println(s"Failed to load task file. Reason: $e")
+          None 
+
