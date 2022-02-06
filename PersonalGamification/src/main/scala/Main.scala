@@ -47,8 +47,8 @@ case class Config(
       )
   }
 
-  OParser.parse(parser, args, Config()) match
-    case Some(config) => parseFile(config)
+  val (player: Option[Player], tasks: Seq[Option[Task]]) = OParser.parse(parser, args, Config()) match
+    case Some(config) => (parseFile(config), parseTasks(config))
     case _ => None
 
 
