@@ -44,30 +44,30 @@ case class Config(
         .action((_, c) => c.copy(list = true)),
       opt[Seq[String]]("done")
         .action((x, c) => c.copy(done = x))
-      )
+    )
   }
 
-  val (player: Option[Player], tasks: Seq[Option[Task]]) = OParser.parse(parser, args, Config()) match
-    case Some(config) => (parseFile(config), parseTasks(config))
-    case _ => None
+  val (player: Option[Player], tasks: Seq[Option[Task]]) =
+    OParser.parse(parser, args, Config()) match
+      case Some(config) => (parseFile(config), parseTasks(config))
+      case _            => None
 
-
-private def parseFile(config: Config): Option[Player] = 
+private def parseFile(config: Config): Option[Player] =
   val mapper = new YAMLMapper() with ClassTagExtensions
   mapper.registerModule(DefaultScalaModule)
   Try { mapper.readValue[Player](config.playerFile) } match
-      case Success(p) => Some(p)
-      case Failure(e) =>
-        println(s"Failed to load player file. Reason: $e")
-        None
+    case Success(p) => Some(p)
+    case Failure(e) =>
+      println(s"Failed to load player file. Reason: $e")
+      None
 
 private def parseTasks(config: Config): Seq[Option[Task]] =
   val mapper = new YAMLMapper() with ClassTagExtensions
   mapper.registerModule(DefaultScalaModule)
-  for ((task: File) <- config.tasksToDo) yield
-    Try { mapper.readValue[Task](task) } match
-        case Success(t) => Some(t)
-        case Failure(e) =>
-          println(s"Failed to load task file. Reason: $e")
-          None 
-
+  for ((task: File) <- config.tasksToDo) yield Try {
+    mapper.readValue[Task](task)
+  } match
+    case Success(t) => Some(t)
+    case Failure(e) =>
+      println(s"Failed to load task file. Reason: $e")
+      None

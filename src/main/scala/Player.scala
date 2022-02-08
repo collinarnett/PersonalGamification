@@ -58,7 +58,6 @@ sealed trait GameObject {
       println(
         s"File already exists at ${file.getCanonicalPath}. Would you like to overwrite it? (Y/y or N/n)"
       )
-      UI.yesNoPrompt()
       mapper.writeValue(file, this)
 }
 
