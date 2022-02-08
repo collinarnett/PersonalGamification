@@ -57,4 +57,4 @@ player.yaml
 tasks.yaml
 out/
 .direnv
-result
+result*
