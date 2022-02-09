@@ -14,8 +14,7 @@
         };
         packageName = "PersonalGamification";
         version = "0.1.0";
-      in {
-        packages.${packageName} = pkgs.sbt.mkDerivation {
+        build = pkgs.sbt.mkDerivation {
           pname = "${packageName}";
           version = "${version}";
           depsSha256 = "pp85kq80/cq03+huBjURytxVw9HPoj4x3UK1Nb8dnoA=";
@@ -23,13 +22,25 @@
           buildPhase = ''
             sbt assembly
           '';
-
           installPhase = ''
-            cp target/scala-*/*-assembly-*.jar $out
+            mkdir -p $out/bin
+            cp target/scala-*/*-assembly-*.jar $out/bin/
           '';
         };
+      in {
+        packages.${packageName} = build;
+
+        defaultPackage = self.packages.${system}.${packageName};
+        packages.dockerImage = pkgs.dockerTools.buildLayeredImage {
+          name = "${packageName}";
+          config.Entrypoint = [ 
+            "${pkgs.jre_headless}/bin/java" 
+            "-jar"
+            "${build}/bin/${packageName}-assembly-${version}.jar"
+          ];
+        };
+        
         devShell =
           pkgs.mkShell { buildInputs = with pkgs; [ sbt jdk scalafmt ]; };
-        defaultPackage = self.packages.${system}.${packageName};
       });
 }
