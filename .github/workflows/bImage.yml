@@ -26,7 +26,7 @@ jobs:
     - name: push docker image to DockerHub
       run: |
         docker load < result
-        docker push latest
+        docker push PersonalGamification:latest
 
 
 
