@@ -26,7 +26,8 @@ jobs:
     - name: push docker image to DockerHub
       run: |
         docker load < result
-        docker push 
+        docker tag result owner/repo:tag
+        docker push  owner/repo:tag
 
 
 
