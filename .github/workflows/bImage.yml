@@ -26,6 +26,7 @@ jobs:
     - name: push docker image to DockerHub
       run: |
         docker load < result
+        docker tag ubuntu:latest owner/repo:tag
         docker push owner/repo:tag
 
 
