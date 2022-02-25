@@ -18,8 +18,7 @@ jobs:
       with:
         nix_path: nixpkgs=channel:nixos-unstable
     - name: Build docker image
-       run: |
-        nix build ".#dockerImage"
+       run: nix build ".#dockerImage"
     - name: Login to DockerHub
       uses: docker/login-action@v1
       with:
