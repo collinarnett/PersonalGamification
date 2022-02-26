@@ -26,7 +26,7 @@ jobs:
     - name: push docker image to DockerHub
       run: |
         docker load < result
-        docker tag personalgamification:50qwhklscaf1w6p37gmcm9jsk0a5j6zk  personalgamification/github_action
+        docker tag result  personalgamification/github_action
         docker push personalgamification/github_action:latest
 
 
