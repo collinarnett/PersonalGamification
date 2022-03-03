@@ -13,6 +13,7 @@
           overlays = [ sbt-derivation.overlay ];
         };
         packageName = "PersonalGamification";
+        dockerRepository = "collinarnett";
         version = "0.1.0";
         build = pkgs.sbt.mkDerivation {
           pname = "${packageName}";
@@ -32,7 +33,7 @@
 
         defaultPackage = self.packages.${system}.${packageName};
         packages.dockerImage = pkgs.dockerTools.buildLayeredImage {
-          name = "${packageName}";
+          name = "${dockerRepository}/${packageName}";
           config.Entrypoint = [ 
             "${pkgs.jre_headless}/bin/java" 
             "-jar"
