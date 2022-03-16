@@ -6,20 +6,18 @@ import scala.util.Try
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper
 import com.fasterxml.jackson.module.scala.ClassTagExtensions
 import com.fasterxml.jackson.module.scala.DefaultScalaModule
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
+import java.util.Calendar
 
-val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
-def afterNow(dd: String): Boolean =
-  LocalDateTime.now().isAfter(LocalDateTime.parse(dd, formatter))
+val stateDir = "/var/lib"
 val r = scala.util.Random
 
 case class Config(
-    status: Boolean = false,
-    list: Boolean = false,
-    playerFile: File = File("player.yaml"),
-    tasksToDo: Seq[File] = Seq(),
-    done: Seq[String] = Seq()
+    mode: Option[String] = None,
+    taskName: Option[String] = None,
+    taskEffort: Option[Integer] = None,
+    taskDescription: Option[String] = None,
+    taskDue: Option[Calendar] = None,
+    taskIdToDelete: Option[Integer] = None
 )
 
 @main def main(args: String*) =
@@ -33,41 +31,38 @@ case class Config(
         "0.1.0",
         "https://github.com/collinarnett/PersonalGamification"
       ),
-      opt[Unit]("status")
-        .action((_, c) => c.copy(status = true))
-        .text("Display your player status."),
-      opt[File]("player")
-        .action((x, c) => c.copy(playerFile = x)),
-      opt[Seq[File]]("add")
-        .action((x, c) => c.copy(tasksToDo = x)),
-      opt[Unit]("list")
-        .action((_, c) => c.copy(list = true)),
-      opt[Seq[String]]("done")
-        .action((x, c) => c.copy(done = x))
+      cmd("task")
+        .action((_, c) => c.copy(mode = "task"))
+        .text("Manage tasks.")
+        .children(
+          cmd("add")
+            .children(
+              arg[String]("name")
+                .required()
+                .action((x, c) => c.copy(taskName = x)),
+              arg[String]("description")
+                .action((x, c) => c.copy(taskDescription = x)),
+              arg[Integer]("effort")
+                .action((x, c) => c.copy(taskEffort = x)),
+              arg[Calendar]("due")
+                .action((x, c) => c.copy(taskDue = x))
+            ),
+          cmd("delete")
+            .children(
+              arg[Integer]("id")
+                .required()
+                .action((x, c) => c.copy(taskIdToDelete = x))
+            )
+        )
     )
+
   }
 
-  val (player: Option[Player], tasks: Seq[Option[Task]]) =
-    OParser.parse(parser, args, Config()) match
-      case Some(config) => (parseFile(config), parseTasks(config))
-      case _            => None
+  OParser.parse(parser, args, Config()) match
+    case Some(config) => parseArgs(config)
+    case _            => None
 
-private def parseFile(config: Config): Option[Player] =
-  val mapper = new YAMLMapper() with ClassTagExtensions
-  mapper.registerModule(DefaultScalaModule)
-  Try { mapper.readValue[Player](config.playerFile) } match
-    case Success(p) => Some(p)
-    case Failure(e) =>
-      println(s"Failed to load player file. Reason: $e")
-      None
-
-private def parseTasks(config: Config): Seq[Option[Task]] =
-  val mapper = new YAMLMapper() with ClassTagExtensions
-  mapper.registerModule(DefaultScalaModule)
-  for ((task: File) <- config.tasksToDo) yield Try {
-    mapper.readValue[Task](task)
-  } match
-    case Success(t) => Some(t)
-    case Failure(e) =>
-      println(s"Failed to load task file. Reason: $e")
-      None
+def parseArgs(config: Config): Unit =
+  config.mode match
+    case "task" =>
+      config.taskDescription, config.taskName, config.taskDue, config.taskEffort
