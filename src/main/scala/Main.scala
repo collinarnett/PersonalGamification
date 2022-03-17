@@ -14,6 +14,7 @@ import scopt.Read
 val stateDir = "/var/lib"
 val r = scala.util.Random
 
+// Recursive funtion for processing tasks
 def parseTask(
     params: Map[String, Any] = Map(),
     args: List[String]
@@ -35,7 +36,12 @@ def parseTask(
 
 implicit val taskRead: Read[Task] = Read.reads { (s: String) =>
   val args =
-    parseTask(args = s.split(",").toList.map(_.split("=").toList).flatten)
+    // Args should look like "pg add name=hello,description=world,effort=12,due=2020-02-12"
+    parseTask(args =
+      s.split(",").toList.map(_.split("=").toList).flatten
+    ) // Split on ',' first then split on '=' for head tail recursion. Flatten list of lists into single list
+
+  // Type cast from 'Any' type to correct type
   Task(
     args("name").asInstanceOf[String],
     args("description").asInstanceOf[String],
@@ -45,7 +51,6 @@ implicit val taskRead: Read[Task] = Read.reads { (s: String) =>
 }
 
 case class Config(
-    mode: Option[String] = None,
     task: Option[Task] = None
 )
 
@@ -61,9 +66,9 @@ case class Config(
         "https://github.com/collinarnett/PersonalGamification"
       ),
       cmd("task")
-        .action((_, c) => c.copy(mode = Some("task")))
         .text("Manage tasks.")
         .children(
+          // Entrypoint for args processing
           opt[Task]("add")
             .required()
             .action((x, c) => c.copy(task = Some(x)))
@@ -73,5 +78,6 @@ case class Config(
   }
 
   OParser.parse(parser, args, Config()) match
+    // This is where our task object will end up as part of the config object
     case Some(config) => config
     case _            => None
