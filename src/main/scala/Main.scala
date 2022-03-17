@@ -11,12 +11,19 @@ import java.util.Calendar
 val stateDir = "/var/lib"
 val r = scala.util.Random
 
+sealed trait TaskArg[A]
+
+case class TaskName(value: String) extends TaskArg[String]
+case class TaskEffort(value: Int) extends TaskArg[Int]
+case class TaskDescription(value: String) extends TaskArg[String]
+case class TaskDue(value: Calendar) extends TaskArg[Calendar]
+
 case class Config(
     mode: Option[String] = None,
-    taskName: Option[String] = None,
-    taskEffort: Option[Integer] = None,
-    taskDescription: Option[String] = None,
-    taskDue: Option[Calendar] = None,
+    taskName: Option[TaskName] = None,
+    taskEffort: Option[TaskEffort] = None,
+    taskDescription: Option[TaskDescription] = None,
+    taskDue: Option[TaskDue] = None,
     taskIdToDelete: Option[Integer] = None
 )
 
@@ -32,26 +39,28 @@ case class Config(
         "https://github.com/collinarnett/PersonalGamification"
       ),
       cmd("task")
-        .action((_, c) => c.copy(mode = "task"))
+        .action((_, c) => c.copy(mode = Some("task")))
         .text("Manage tasks.")
         .children(
           cmd("add")
             .children(
-              arg[String]("name")
+              opt[String]("name")
                 .required()
-                .action((x, c) => c.copy(taskName = x)),
-              arg[String]("description")
-                .action((x, c) => c.copy(taskDescription = x)),
-              arg[Integer]("effort")
-                .action((x, c) => c.copy(taskEffort = x)),
-              arg[Calendar]("due")
-                .action((x, c) => c.copy(taskDue = x))
+                .action((x, c) => c.copy(taskName = Some(TaskName(x)))),
+              opt[String]("description")
+                .action((x, c) =>
+                  c.copy(taskDescription = Some(TaskDescription(x)))
+                ),
+              opt[Int]("effort")
+                .action((x, c) => c.copy(taskEffort = Some(TaskEffort(x)))),
+              opt[Calendar]("due")
+                .action((x, c) => c.copy(taskDue = Some(TaskDue(x))))
             ),
           cmd("delete")
             .children(
-              arg[Integer]("id")
+              opt[Int]("id")
                 .required()
-                .action((x, c) => c.copy(taskIdToDelete = x))
+                .action((x, c) => c.copy(taskIdToDelete = Some(x)))
             )
         )
     )
@@ -64,5 +73,10 @@ case class Config(
 
 def parseArgs(config: Config): Unit =
   config.mode match
-    case "task" =>
-      config.taskDescription, config.taskName, config.taskDue, config.taskEffort
+    case Some("task") =>
+      print(filterTaskArgs(config))
+
+def filterTaskArgs(config: Config) =
+  val args: Seq[TaskArg[Any]] = config.productIterator.collect {
+    case taskArg: TaskArg[Any] => taskArg
+  }.toSeq
