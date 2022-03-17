@@ -8,6 +8,8 @@ import com.fasterxml.jackson.core.`type`.TypeReference
 import com.fasterxml.jackson.module.scala.ClassTagExtensions
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import java.util.Calendar
+import java.util.Date
 
 case class AbilityScores(
     strength: Int = 0,
@@ -62,11 +64,10 @@ sealed trait GameObject {
 }
 
 case class Task(
-    name: String = "",
-    description: String = "",
-    dueDate: String = "",
-    difficulty: Int = 0,
-    abilityScores: AbilityScores = AbilityScores()
+    name: String,
+    description: String,
+    effort: Int,
+    due: Date 
 )
 
 case class Player(

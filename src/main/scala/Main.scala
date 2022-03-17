@@ -6,25 +6,47 @@ import scala.util.Try
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper
 import com.fasterxml.jackson.module.scala.ClassTagExtensions
 import com.fasterxml.jackson.module.scala.DefaultScalaModule
-import java.util.Calendar
+import java.util.{Locale, Calendar, GregorianCalendar}
+import java.text.SimpleDateFormat
+import java.util.Date
+import scopt.Read
 
 val stateDir = "/var/lib"
 val r = scala.util.Random
 
-sealed trait TaskArg[A]
+def parseTask(
+    params: Map[String, Any] = Map(),
+    args: List[String]
+): Map[String, Any] =
+  args match
+    case "name" :: name :: tail =>
+      parseTask(params ++ Map("name" -> name), tail)
+    case "description" :: description :: tail =>
+      parseTask(params ++ Map("description" -> description), tail)
+    case "effort" :: effort :: tail =>
+      parseTask(params ++ Map("effort" -> effort.toInt), tail)
+    case "due" :: due :: tail =>
+      parseTask(
+        params ++ Map("due" -> SimpleDateFormat("yyyy-mm-dd").parse(due)),
+        tail
+      )
+    case Nil => params
+    case _   => params
 
-case class TaskName(value: String) extends TaskArg[String]
-case class TaskEffort(value: Int) extends TaskArg[Int]
-case class TaskDescription(value: String) extends TaskArg[String]
-case class TaskDue(value: Calendar) extends TaskArg[Calendar]
+implicit val taskRead: Read[Task] = Read.reads { (s: String) =>
+  val args =
+    parseTask(args = s.split(",").toList.map(_.split("=").toList).flatten)
+  Task(
+    args("name").asInstanceOf[String],
+    args("description").asInstanceOf[String],
+    args("effort").asInstanceOf[Int],
+    args("due").asInstanceOf[Date]
+  )
+}
 
 case class Config(
     mode: Option[String] = None,
-    taskName: Option[TaskName] = None,
-    taskEffort: Option[TaskEffort] = None,
-    taskDescription: Option[TaskDescription] = None,
-    taskDue: Option[TaskDue] = None,
-    taskIdToDelete: Option[Integer] = None
+    task: Option[Task] = None
 )
 
 @main def main(args: String*) =
@@ -42,41 +64,14 @@ case class Config(
         .action((_, c) => c.copy(mode = Some("task")))
         .text("Manage tasks.")
         .children(
-          cmd("add")
-            .children(
-              opt[String]("name")
-                .required()
-                .action((x, c) => c.copy(taskName = Some(TaskName(x)))),
-              opt[String]("description")
-                .action((x, c) =>
-                  c.copy(taskDescription = Some(TaskDescription(x)))
-                ),
-              opt[Int]("effort")
-                .action((x, c) => c.copy(taskEffort = Some(TaskEffort(x)))),
-              opt[Calendar]("due")
-                .action((x, c) => c.copy(taskDue = Some(TaskDue(x))))
-            ),
-          cmd("delete")
-            .children(
-              opt[Int]("id")
-                .required()
-                .action((x, c) => c.copy(taskIdToDelete = Some(x)))
-            )
+          opt[Task]("add")
+            .required()
+            .action((x, c) => c.copy(task = Some(x)))
         )
     )
 
   }
 
   OParser.parse(parser, args, Config()) match
-    case Some(config) => parseArgs(config)
+    case Some(config) => config
     case _            => None
-
-def parseArgs(config: Config): Unit =
-  config.mode match
-    case Some("task") =>
-      print(filterTaskArgs(config))
-
-def filterTaskArgs(config: Config) =
-  val args: Seq[TaskArg[Any]] = config.productIterator.collect {
-    case taskArg: TaskArg[Any] => taskArg
-  }.toSeq
