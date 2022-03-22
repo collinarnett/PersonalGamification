@@ -38,18 +38,21 @@ implicit val taskRead: Read[Task] = Read.reads { (s: String) =>
   val args =
     // Args should look like "pg add name=hello,description=world,effort=12,due=2020-02-12"
     parseTask(args =
-      s.split(",").toList.map(_.split("=").toList).flatten
+      s.split(s",").toList.map(_.split("=").toList).flatten
     ) // Split on ',' first then split on '=' for head tail recursion. Flatten list of lists into single list
 
   // Type cast from 'Any' type to correct type
+try{
   Task(
     args("name").asInstanceOf[String],
     args("description").asInstanceOf[String],
     args("effort").asInstanceOf[Int],
     args("due").asInstanceOf[Date]
   )
+}catch{
+  case ex: ClassCastException => println("Used the wrong type for the arguments")
+   } 
 }
-
 case class Config(
     task: Option[Task] = None
 )
@@ -80,4 +83,5 @@ case class Config(
   OParser.parse(parser, args, Config()) match
     // This is where our task object will end up as part of the config object
     case Some(config) => config
-    case _            => None
+    case _            => println("Entered the wrong argument\n" +
+      "Please Enter args like: pg add name=hello,description=world,effort=12,due=2020-02-12")
