@@ -9,7 +9,9 @@ import com.fasterxml.jackson.module.scala.DefaultScalaModule
 import java.util.{Locale, Calendar, GregorianCalendar}
 import java.text.SimpleDateFormat
 import java.util.Date
+import scala.util.matching.Regex
 import scopt.Read
+import scala.compiletime.ops.boolean
 
 val stateDir = "/var/lib"
 val r = scala.util.Random
@@ -35,24 +37,24 @@ def parseTask(
     case _   => params
 
 implicit val taskRead: Read[Task] = Read.reads { (s: String) =>
-  val args =
+  val pattern= new Regex("name=[a-zA-z],description=[a-zA-Z],effort=[0-9],due=(\\d{4})-([01][0-9])-([012][0-9])")
+  
+  if((pattern.findAllIn(s).toList).length==1){
     // Args should look like "pg add name=hello,description=world,effort=12,due=2020-02-12"
-    parseTask(args =
-      s.split(s",").toList.map(_.split("=").toList).flatten
-    ) // Split on ',' first then split on '=' for head tail recursion. Flatten list of lists into single list
+    val args= parseTask(args =
+        s.split(s",").toList.map(_.split("=").toList).flatten
+      ) // Split on ',' first then split on '=' for head tail recursion. Flatten list of lists into single list
+    Task(
+      args("name").asInstanceOf[String],
+      args("description").asInstanceOf[String],
+      args("effort").asInstanceOf[Int],
+      args("due").asInstanceOf[Date]
+    )
 
-  // Type cast from 'Any' type to correct type
-try{
-  Task(
-    args("name").asInstanceOf[String],
-    args("description").asInstanceOf[String],
-    args("effort").asInstanceOf[Int],
-    args("due").asInstanceOf[Date]
-  )
-}catch{
-  case ex: ClassCastException => println("Used the wrong type for the arguments")
-   } 
+  }
+  
 }
+
 case class Config(
     task: Option[Task] = None
 )
