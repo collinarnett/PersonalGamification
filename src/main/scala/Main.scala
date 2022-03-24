@@ -27,33 +27,39 @@ def parseTask(
     case "description" :: description :: tail =>
       parseTask(params ++ Map("description" -> description), tail)
     case "effort" :: effort :: tail =>
-      parseTask(params ++ Map("effort" -> effort.toInt), tail)
-    case "due" :: due :: tail =>
+      parseTask(params ++ Map(s"effort" -> effort.toInt), tail)
+    case s"due" :: due :: tail =>
       parseTask(
-        params ++ Map("due" -> SimpleDateFormat("yyyy-mm-dd").parse(due)),
+        params ++ Map(s"due" -> SimpleDateFormat("yyyy-mm-dd").parse(due)),
         tail
       )
     case Nil => params
     case _   => params
 
 implicit val taskRead: Read[Task] = Read.reads { (s: String) =>
-  val pattern= new Regex("name=[a-zA-z],description=[a-zA-Z],effort=[0-9],due=(\\d{4})-([01][0-9])-([012][0-9])")
-  
-  if((pattern.findAllIn(s).toList).length==1){
     // Args should look like "pg add name=hello,description=world,effort=12,due=2020-02-12"
-    val args= parseTask(args =
-        s.split(s",").toList.map(_.split("=").toList).flatten
-      ) // Split on ',' first then split on '=' for head tail recursion. Flatten list of lists into single list
-    Task(
+  val args= parseTask(args =
+                              if(validArg(s))
+                                s.split(s",").toList.map(_.split("=").toList).flatten
+                              else
+                                Nil
+                        ) // Split on ',' first then split on '=' for head tail recursion. Flatten list of lists into single list
+  Task(
       args("name").asInstanceOf[String],
       args("description").asInstanceOf[String],
       args("effort").asInstanceOf[Int],
       args("due").asInstanceOf[Date]
-    )
+  )
+} 
 
-  }
-  
+def validArg(s:String):Boolean ={
+  val pattern= new Regex("name=[a-zA-z],description=[a-zA-Z],effort=[0-9],due=(\\d{4})-([01][0-9])-([012][0-9])")
+  if(pattern.findAllIn(s).toList.length ==1)
+    return true
+  else
+    return false
 }
+ 
 
 case class Config(
     task: Option[Task] = None
@@ -87,3 +93,4 @@ case class Config(
     case Some(config) => config
     case _            => println("Entered the wrong argument\n" +
       "Please Enter args like: pg add name=hello,description=world,effort=12,due=2020-02-12")
+
