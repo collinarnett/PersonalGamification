@@ -9,7 +9,9 @@ import com.fasterxml.jackson.module.scala.DefaultScalaModule
 import java.util.{Locale, Calendar, GregorianCalendar}
 import java.text.SimpleDateFormat
 import java.util.Date
+import scala.util.matching.Regex
 import scopt.Read
+import scala.compiletime.ops.boolean
 
 val stateDir = "/var/lib"
 val r = scala.util.Random
@@ -25,35 +27,51 @@ def parseTask(
     case "description" :: description :: tail =>
       parseTask(params ++ Map("description" -> description), tail)
     case "effort" :: effort :: tail =>
-      parseTask(params ++ Map("effort" -> effort.toInt), tail)
-    case "due" :: due :: tail =>
+      parseTask(params ++ Map(s"effort" -> effort.toInt), tail)
+    case s"due" :: due :: tail =>
       parseTask(
-        params ++ Map("due" -> SimpleDateFormat("yyyy-mm-dd").parse(due)),
+        params ++ Map(s"due" -> SimpleDateFormat("yyyy-mm-dd").parse(due)),
         tail
       )
     case Nil => params
     case _   => params
 
 implicit val taskRead: Read[Task] = Read.reads { (s: String) =>
-  val args =
-    // Args should look like "pg add name=hello,description=world,effort=12,due=2020-02-12"
-    parseTask(args =
-      s.split(",").toList.map(_.split("=").toList).flatten
-    ) // Split on ',' first then split on '=' for head tail recursion. Flatten list of lists into single list
-
-  // Type cast from 'Any' type to correct type
+  // Args should look like "pg add name=hello,description=world,effort=12,due=2020-02-12"
+  println("hello world")
+  val list: List[String]= List("world")
+  val args= parseTask(args =
+                          if(validArg(s))
+                            s.split(s",").toList.map(_.split("=").toList).flatten
+                          else
+                            list
+                      ) 
+  // Split on ',' first then split on '=' for head tail recursion. Flatten list of lists into single list
+  if(args.size == 1)
+    println("Entered wrong arguments" + "Please Enter args: pg add name=hello,description=world,effort=12,due=2020-02-12")
+  else
+    println("")
   Task(
     args("name").asInstanceOf[String],
     args("description").asInstanceOf[String],
     args("effort").asInstanceOf[Int],
     args("due").asInstanceOf[Date]
   )
+} 
+
+def validArg(s:String):Boolean ={
+  val pattern= new Regex("^pg task --add name=[a-zA-z]+,description=[a-zA-Z\\s]+,effort=[0-9],due=(\\d{4})-([01][0-9])-([012][0-9])$")
+  if(pattern.findAllIn(s).toList.length ==1)
+    return true
+  else
+    return false
 }
+ 
 
 case class Config(
     task: Option[Task] = None
 )
-
+                   
 @main def main(args: String*) =
   val builder = OParser.builder[Config]
   val parser = {
@@ -80,4 +98,5 @@ case class Config(
   OParser.parse(parser, args, Config()) match
     // This is where our task object will end up as part of the config object
     case Some(config) => config
-    case _            => None
+    case _=> None
+
