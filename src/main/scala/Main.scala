@@ -37,23 +37,30 @@ def parseTask(
     case _   => params
 
 implicit val taskRead: Read[Task] = Read.reads { (s: String) =>
-    // Args should look like "pg add name=hello,description=world,effort=12,due=2020-02-12"
+  // Args should look like "pg add name=hello,description=world,effort=12,due=2020-02-12"
+  println("hello world")
+  val list: List[String]= List("world")
   val args= parseTask(args =
-                              if(validArg(s))
-                                s.split(s",").toList.map(_.split("=").toList).flatten
-                              else
-                                Nil
-                        ) // Split on ',' first then split on '=' for head tail recursion. Flatten list of lists into single list
+                          if(validArg(s))
+                            s.split(s",").toList.map(_.split("=").toList).flatten
+                          else
+                            list
+                      ) 
+  // Split on ',' first then split on '=' for head tail recursion. Flatten list of lists into single list
+  if(args.size == 1)
+    println("Entered wrong arguments" + "Please Enter args: pg add name=hello,description=world,effort=12,due=2020-02-12")
+  else
+    println("")
   Task(
-      args("name").asInstanceOf[String],
-      args("description").asInstanceOf[String],
-      args("effort").asInstanceOf[Int],
-      args("due").asInstanceOf[Date]
+    args("name").asInstanceOf[String],
+    args("description").asInstanceOf[String],
+    args("effort").asInstanceOf[Int],
+    args("due").asInstanceOf[Date]
   )
 } 
 
 def validArg(s:String):Boolean ={
-  val pattern= new Regex("name=[a-zA-z],description=[a-zA-Z],effort=[0-9],due=(\\d{4})-([01][0-9])-([012][0-9])")
+  val pattern= new Regex("^pg task --add name=[a-zA-z]+,description=[a-zA-Z\\s]+,effort=[0-9],due=(\\d{4})-([01][0-9])-([012][0-9])$")
   if(pattern.findAllIn(s).toList.length ==1)
     return true
   else
@@ -64,7 +71,7 @@ def validArg(s:String):Boolean ={
 case class Config(
     task: Option[Task] = None
 )
-
+                   
 @main def main(args: String*) =
   val builder = OParser.builder[Config]
   val parser = {
@@ -91,6 +98,5 @@ case class Config(
   OParser.parse(parser, args, Config()) match
     // This is where our task object will end up as part of the config object
     case Some(config) => config
-    case _            => println("Entered the wrong argument\n" +
-      "Please Enter args like: pg add name=hello,description=world,effort=12,due=2020-02-12")
+    case _=> None
 
