@@ -67,7 +67,7 @@ case class Task(
     name: String,
     description: String,
     effort: Int,
-    due: Date 
+    due: Date
 )
 
 case class Player(
