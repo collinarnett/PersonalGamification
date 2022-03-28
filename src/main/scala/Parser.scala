@@ -11,9 +11,8 @@ object Parser {
   def apply(args: Seq[String]) =
     OParser.parse(parser, args, Config()) match
       // This is where our task object will end up as part of the config object
-      case Some(config) => println(config)
-      case _            => println("PLEASE ENTER ARGS: pg task --add name=hello,description=world,effort=12,due=2020-02-12"
-                                   )
+      case Some(config) => config
+      case _            => None
 
   def parseTask(
       params: Map[String, Any] = Map(),
@@ -51,7 +50,9 @@ object Parser {
           opt[Task]("add")
             .required()
             .action((x, c) => c.copy(task = Some(x)))
+            .text("Example: pg task --add name=hello,description=world,effort=12,due=2020-02-12")   
         )
+        
     )
 
 }

@@ -16,11 +16,11 @@ class PersonalGamificationSpec extends AnyFlatSpec with should.Matchers:
     val strSeq3:Seq[String]=Seq("task", "--add", "aaaaaadkajkdjkajdkajdkajkdjkajdka111")
     val strSeq4:Seq[String]=Seq("task", "--add",  "namehellodescriptionworldeffort122022-3-22")
 
-    Parser.apply(strSeq)
+    //Parser.apply(strSeq)
     //Parser.apply(strSeq1)
     //Parser.apply(strSeq2)
     //Parser.apply(strSeq3)
-    //Parser.apply(strSeq4)
+    Parser.apply(strSeq4)
   }
    
   // val playerFile = File("player.yaml")
