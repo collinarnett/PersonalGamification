@@ -3,4 +3,3 @@ val r = scala.util.Random
 
 @main def main(args: String*) =
   val config = Parser(args)
-  print(config)
