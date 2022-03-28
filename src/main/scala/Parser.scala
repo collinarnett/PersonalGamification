@@ -2,8 +2,8 @@ import scopt.OParser
 import scopt.Read
 import java.text.SimpleDateFormat
 import java.util.Date
-import scala.util.matching.Regex
-import scala.compiletime.ops.string
+
+
 
 // Recursive funtion for processing tasks
 object Parser {
@@ -65,8 +65,7 @@ implicit val taskRead: Read[Task] = Read.reads { (s: String) =>
     Parser.parseTask(args =
       s.split(s",").toList.map(_.split("=").toList).flatten
     )
-  // TODO Find a more scalable way to do argument validation, move this into scopt validation as well.
-  
+
   Task(
     args("name").asInstanceOf[String],
     args("description").asInstanceOf[String],

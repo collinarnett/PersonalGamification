@@ -9,19 +9,22 @@ import com.fasterxml.jackson.core.`type`.TypeReference
 class PersonalGamificationSpec extends AnyFlatSpec with should.Matchers:
 
   it should "take Properly format args and create a task object" in {
-    //val args="pg task add name=hello,description=world,effort=1,due=2022-02-22"
+
     val strSeq: Seq[String]=Seq("task", "--add")
     val strSeq1:Seq[String]=Seq("task", "--add", "name=hello, description=world, effort=12, due=2022-3-22")
-    val strSeq2:Seq[String]=Seq("task", "--add", "name=hello,description=world,effort=12,due=hello")
+    val strSeq2:Seq[String]=Seq("task", "--add", "name=42.35,description=-1000,effort=12,due=2022-3-22")
     val strSeq3:Seq[String]=Seq("task", "--add", "aaaaaadkajkdjkajdkajdkajkdjkajdka111")
     val strSeq4:Seq[String]=Seq("task", "--add",  "namehellodescriptionworldeffort122022-3-22")
 
-    //Parser.apply(strSeq)
-    //Parser.apply(strSeq1)
-    //Parser.apply(strSeq2)
-    //Parser.apply(strSeq3)
-    Parser.apply(strSeq4)
+      Parser.apply(strSeq)
+      Parser.apply(strSeq1)
+      Parser.apply(strSeq2)
+      Parser.apply(strSeq3)
+      Parser.apply(strSeq4) 
+    
   }
+    
+
    
   // val playerFile = File("player.yaml")
   // val taskFile = File("tasks.yaml")
