@@ -2,7 +2,8 @@ import scopt.OParser
 import scopt.Read
 import java.text.SimpleDateFormat
 import java.util.Date
-import scala.util.matching.Regex
+
+
 
 // Recursive funtion for processing tasks
 object Parser {
@@ -49,7 +50,9 @@ object Parser {
           opt[Task]("add")
             .required()
             .action((x, c) => c.copy(task = Some(x)))
+            .text("Example: pg task --add name=hello,description=world,effort=12,due=2020-02-12")   
         )
+        
     )
 
 }
@@ -62,31 +65,13 @@ implicit val taskRead: Read[Task] = Read.reads { (s: String) =>
     Parser.parseTask(args =
       s.split(s",").toList.map(_.split("=").toList).flatten
     )
-  // TODO Find a more scalable way to do argument validation, move this into scopt validation as well.
-  if (args.size == 1)
-    println(
-      "Entered wrong arguments" + "Please Enter args: pg add name=hello,description=world,effort=12,due=2020-02-12"
-    )
-  else
-    // TODO This is bad scala practice, we shouldn't cause unnessary side effects.
-    println("")
+
   Task(
     args("name").asInstanceOf[String],
     args("description").asInstanceOf[String],
     args("effort").asInstanceOf[Int],
     args("due").asInstanceOf[Date]
   )
-}
-
-// TODO Please move this as a validation stage within scopt
-def validArg(s: String): Boolean = {
-  val pattern = new Regex(
-    "^pg task --add name=[a-zA-z]+,description=[a-zA-Z\\s]+,effort=[0-9],due=(\\d{4})-([01][0-9])-([012][0-9])$"
-  )
-  if (pattern.findAllIn(s).toList.length == 1)
-    return true
-  else
-    return false
 }
 
 case class Config(

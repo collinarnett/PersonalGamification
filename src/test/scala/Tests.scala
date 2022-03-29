@@ -5,27 +5,26 @@ import matchers._
 import com.fasterxml.jackson.core.`type`.TypeReference
 
 
+
 class PersonalGamificationSpec extends AnyFlatSpec with should.Matchers:
 
-  it should "tell whether args are formatted correctly" in {
-    val args="pg task add name=hello,description=world,effort=1,due=2022-02-22"
-    assert(validArg(args)==true)
-    // val args1="pg add"
-    // assert(validArg(args1)==false)
-    // val args2="pg add 122313i3i1o313io13i"
-    // assert(validArg(args2)==false)
-    // val args3="pg add nami=hello, description=world, effort=12, due=2022-3-22"
-    // assert(validArg(args3)==false)
-    // val args4=  "pg add namehellodescriptionworldeffort122022-3-22"
-    // assert(validArg(args4)==false)
-    // val args5= "pg add nami=hello, description=world, effort=12, due=hello"
-    // assert(validArg(args5)==false)     
+  it should "take Properly format args and create a task object" in {
+
+    val strSeq: Seq[String]=Seq("task", "--add")
+    val strSeq1:Seq[String]=Seq("task", "--add", "name=hello, description=world, effort=12, due=2022-3-22")
+    val strSeq2:Seq[String]=Seq("task", "--add", "name=42.35,description=-1000,effort=12,due=2022-3-22")
+    val strSeq3:Seq[String]=Seq("task", "--add", "aaaaaadkajkdjkajdkajdkajkdjkajdka111")
+    val strSeq4:Seq[String]=Seq("task", "--add",  "namehellodescriptionworldeffort122022-3-22")
+
+      Parser.apply(strSeq)
+      Parser.apply(strSeq1)
+      Parser.apply(strSeq2)
+      Parser.apply(strSeq3)
+      Parser.apply(strSeq4) 
+    
   }
-  it should "take in args and read the taskfrom it" in {
-    val arg="pg task"
-    //Oparser.parse(taskRead, arg, config())    
-    main()
-  }
+    
+
    
   // val playerFile = File("player.yaml")
   // val taskFile = File("tasks.yaml")
@@ -37,7 +36,6 @@ class PersonalGamificationSpec extends AnyFlatSpec with should.Matchers:
   //   playerFile.delete()
   //   hasBeenSaved should be(true)
   // }
-
   // it should "load a Player object" in {
   //   val player1 = Player()
   //   player1.save(playerFile)
