@@ -3,15 +3,13 @@ import scopt.Read
 import java.text.SimpleDateFormat
 import java.util.Date
 
-
-
 // Recursive funtion for processing tasks
 object Parser {
 
   def apply(args: Seq[String]) =
     OParser.parse(parser, args, Config()) match
       // This is where our task object will end up as part of the config object
-      case Some(config) => config
+      case Some(config) => println(config)
       case _            => None
 
   def parseTask(
@@ -50,9 +48,12 @@ object Parser {
           opt[Task]("add")
             .required()
             .action((x, c) => c.copy(task = Some(x)))
-            .text("Example: pg task --add name=hello,description=world,effort=12,due=2020-02-12")   
+            .text(
+              "FORMAT <value>: name=String,description=String,effort=Integer,due=yyyy-mm-dd" +
+                "\nReminder: Arguments are delimited by a comma only" +
+                "\nExample: pg task --add name=hello,description=world,effort=12,due=2024-03-22"
+            )
         )
-        
     )
 
 }
