@@ -8,7 +8,7 @@ object Parser {
 
   def apply(args: Seq[String]) =
     OParser.parse(parser, args, Config()) match
-      // This is where our task object will end up as part of the config object
+      // This is where our task objects will end up as part of the config object
       case Some(config) => config
       case _            => None
 
