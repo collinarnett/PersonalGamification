@@ -3,6 +3,7 @@ import scopt.Read
 import java.text.SimpleDateFormat
 import java.util.Date
 
+
 // Recursive funtion for processing tasks
 object Parser {
 
@@ -54,6 +55,7 @@ object Parser {
                 "\nExample: pg task --add name=hello,description=world,effort=12,due=2024-03-22"
             )
         )
+        
     )
 
 }
