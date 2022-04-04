@@ -1,36 +1,32 @@
 import scopt.OParser
-import scopt.Read
-import java.text.SimpleDateFormat
-import java.util.Date
-
+import java.util.GregorianCalendar
+import java.util.Calendar
 
 // Recursive funtion for processing tasks
 object Parser {
-
   def apply(args: Seq[String]) =
     OParser.parse(parser, args, Config()) match
-      // This is where our task objects will end up as part of the config object
-      case Some(config) => config
+      // This is where our task object will end up as part of the config object
+      case Some(config) => mode(config)
       case _            => None
 
-  def parseTask(
-      params: Map[String, Any] = Map(),
-      args: List[String]
-  ): Map[String, Any] =
-    args match
-      case "name" :: name :: tail =>
-        parseTask(params ++ Map("name" -> name), tail)
-      case "description" :: description :: tail =>
-        parseTask(params ++ Map("description" -> description), tail)
-      case "effort" :: effort :: tail =>
-        parseTask(params ++ Map(s"effort" -> effort.toInt), tail)
-      case s"due" :: due :: tail =>
-        parseTask(
-          params ++ Map(s"due" -> SimpleDateFormat("yyyy-mm-dd").parse(due)),
-          tail
-        )
-      case Nil => params
-      case _   => params
+  def parseTask(config: Config): Task =
+    Task(
+      config.name,
+      config.effort,
+      config.description match
+        case Some(value) => value
+        case None        => ""
+      ,
+      config.due match
+        case Some(value) => value
+        case None        => GregorianCalendar(9999, 0, 0)
+    )
+
+  private def mode(config: Config) =
+    config.mode match
+      case "add" => parseTask(config)
+      case _     =>
 
   private val builder = OParser.builder[Config]
   private val parser =
@@ -46,37 +42,35 @@ object Parser {
         .text("Manage tasks.")
         .children(
           // Entrypoint for args processing
-          opt[Task]("add")
+          cmd("add")
             .required()
-            .action((x, c) => c.copy(task = Some(x)))
-            .text(
-              "FORMAT <value>: name=String,description=String,effort=Integer,due=yyyy-mm-dd" +
-                "\nReminder: Arguments are delimited by a comma only" +
-                "\nExample: pg task --add name=hello,description=world,effort=12,due=2024-03-22"
+            .action((x, c) => c.copy(mode = "add"))
+            .text("Add a task")
+            .children(
+              opt[String]("name")
+                .required()
+                .action((x, c) => c.copy(name = x))
+                .text("Name of the task"),
+              opt[Int]("effort")
+                .required()
+                .action((x, c) => c.copy(effort = x))
+                .text("Amount of effort required to complete the task"),
+              opt[String]("description")
+                .action((x, c) => c.copy(description = Some(x)))
+                .text("Description of the task"),
+              opt[Calendar]("due")
+                .action((x, c) => c.copy(due = Some(x)))
+                .text("When the task is due.")
             )
         )
-        
     )
 
-}
-
-implicit val taskRead: Read[Task] = Read.reads { (s: String) =>
-  // Args should look like "pg add name=hello,description=world,effort=12,due=2020-02-12"
-  val list: List[String] = List("world")
-  // Split on ',' first then split on '=' for head tail recursion. Flatten list of lists into single list
-  val args =
-    Parser.parseTask(args =
-      s.split(s",").toList.map(_.split("=").toList).flatten
-    )
-
-  Task(
-    args("name").asInstanceOf[String],
-    args("description").asInstanceOf[String],
-    args("effort").asInstanceOf[Int],
-    args("due").asInstanceOf[Date]
-  )
 }
 
 case class Config(
-    task: Option[Task] = None
+    mode: String = "None",
+    name: String = "None",
+    effort: Int = 0,
+    description: Option[String] = None,
+    due: Option[Calendar] = None
 )

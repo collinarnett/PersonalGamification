@@ -62,12 +62,6 @@ sealed trait GameObject {
       )
       mapper.writeValue(file, this)
 }
-case class Task(
-    name: String,
-    description: String,
-    effort: Int,
-    due: Date
-)
 
 case class Player(
     name: String = "Player",
