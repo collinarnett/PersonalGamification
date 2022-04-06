@@ -17,8 +17,11 @@ class PersonalGamificationSpec extends AnyFlatSpec with should.Matchers:
     )
     val strSeq2: Seq[String] = Seq(
       "task",
-      "--add",
-      "name=word,description=hello my name is Abenezer,effort=12,due=2022-3-22"
+      "add",
+      "--name world",
+      " --effort 12",
+      " --description hello my name is Abenezer",
+      " --due 2022-3-22"
     )
     val strSeq3: Seq[String] =
       Seq("task", "--add", "aaaaaadkajkdjkajdkajdkajkdjkajdka111")
@@ -26,7 +29,7 @@ class PersonalGamificationSpec extends AnyFlatSpec with should.Matchers:
       Seq("task", "--add", "namehellodescriptionworldeffort122022-3-22")
 
     ////////Parser.apply(strSeq2)
-    Parser.apply(strSeq1)
+    Parser.apply(strSeq2)
     //Parser.apply(strSeq2)
     // Parser.apply(strSeq3)
     //Parser.apply(strSeq4)
