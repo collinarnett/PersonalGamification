@@ -1,4 +1,3 @@
-
 val stateDir = "/var/lib"
 val r = scala.util.Random
 

@@ -4,7 +4,6 @@ import org.scalatest.flatspec.AnyFlatSpec
 import matchers._
 import com.fasterxml.jackson.core.`type`.TypeReference
 
-
 class PersonalGamificationSpec extends AnyFlatSpec with should.Matchers:
 
   it should "take Properly format args and create a task object" in {
