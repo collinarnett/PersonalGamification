@@ -8,10 +8,10 @@ lazy val root = project
     scalaVersion := scala3Version,
     libraryDependencies ++= Seq(
       "org.scalatest" %% "scalatest" % "3.2.10" % Test,
-       "com.lihaoyi" %% "os-lib" % "0.7.1",
       "com.fasterxml.jackson.module" % "jackson-module-scala_2.13" % "2.13.1",
       "com.fasterxml.jackson.dataformat" % "jackson-dataformat-yaml" % "2.13.1",
-      "com.github.scopt" %% "scopt" % "4.0.1"
+      "com.github.scopt" %% "scopt" % "4.0.1",
+      "com.lihaoyi" %% "os-lib" % "0.8.0"
     ),
     assembly / assemblyMergeStrategy := {
       case PathList("module-info.class") => MergeStrategy.discard
