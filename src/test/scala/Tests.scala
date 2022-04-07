@@ -4,7 +4,6 @@ import org.scalatest.flatspec.AnyFlatSpec
 import matchers._
 import com.fasterxml.jackson.core.`type`.TypeReference
 
-
 class PersonalGamificationSpec extends AnyFlatSpec with should.Matchers:
 
   it should "take Properly format args and create a task object" in {
@@ -17,48 +16,26 @@ class PersonalGamificationSpec extends AnyFlatSpec with should.Matchers:
     )
     val strSeq2: Seq[String] = Seq(
       "task",
-      "--add",
-      "name=word,description=hello my name is Abenezer,effort=12,due=2022-3-22"
+      "add",
+      "--name world",
+      " --effort 12",
+      " --description hello my name is Abenezer",
+      " --due 2022-3-22"
     )
     val strSeq3: Seq[String] =
       Seq("task", "--add", "aaaaaadkajkdjkajdkajdkajkdjkajdka111")
     val strSeq4: Seq[String] =
       Seq("task", "--add", "namehellodescriptionworldeffort122022-3-22")
 
-    ////////Parser.apply(strSeq2)
-    Parser.apply(strSeq1)
-    //Parser.apply(strSeq2)
-    // Parser.apply(strSeq3)
-    //Parser.apply(strSeq4)
-
+    Parser.apply(strSeq2)
+  }
+  it should "take in an object and seralize it" in {
+    case class Person(name:String, email:String, age: Int)
+    val nP = new Person("Abenezer1", "@gmail.com", 12)
+    val path = os.pwd/"taskInProgress"
+    writer.searlize(path, "hello2.yaml", nP)
   }
 
-// val playerFile = File("player.yaml")
-// val taskFile = File("tasks.yaml")
 
-// "A Player" should "save a Player object" in {
-//   val player1 = Player()
-//   player1.save(playerFile)
-//   val hasBeenSaved = playerFile.exists
-//   playerFile.delete()
-//   hasBeenSaved should be(true)
-// }
-// it should "load a Player object" in {
-//   val player1 = Player()
-//   player1.save(playerFile)
-//   val player2 = Player()
-//   playerFile.delete()
-//   (player2 == player1) should be(true)
-// }
-
-// "Main" should "create initial player and tasks file" in {
-//   val args = "init"
-//   main(args)
-//   val haveBeenCreated = (playerFile.exists && taskFile.exists)
-//   playerFile.delete()
-//   taskFile.delete()
-//   haveBeenCreated should be(true)
-
-// }
 
     
