@@ -32,8 +32,8 @@ class PersonalGamificationSpec extends AnyFlatSpec with should.Matchers:
   it should "take in an object and seralize it" in {
     case class Person(name:String, email:String, age: Int)
     val nP = new Person("Abenezer1", "@gmail.com", 12)
-    val path = os.pwd
-    writer.seralize(path, "hello.txt", nP)
+    val path = os.pwd/"taskInProgress"
+    writer.searlize(path, "hello2.yaml", nP)
   }
 
 
