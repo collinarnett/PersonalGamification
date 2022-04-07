@@ -27,40 +27,15 @@ class PersonalGamificationSpec extends AnyFlatSpec with should.Matchers:
     val strSeq4: Seq[String] =
       Seq("task", "--add", "namehellodescriptionworldeffort122022-3-22")
 
-    ////////Parser.apply(strSeq2)
     Parser.apply(strSeq2)
-    //Parser.apply(strSeq2)
-    // Parser.apply(strSeq3)
-    //Parser.apply(strSeq4)
-
+  }
+  it should "take in an object and seralize it" in {
+    case class Person(name:String, email:String, age: Int)
+    val nP = new Person("Abenezer1", "@gmail.com", 12)
+    val path = os.pwd
+    writer.seralize(path, "hello.txt", nP)
   }
 
-// val playerFile = File("player.yaml")
-// val taskFile = File("tasks.yaml")
 
-// "A Player" should "save a Player object" in {
-//   val player1 = Player()
-//   player1.save(playerFile)
-//   val hasBeenSaved = playerFile.exists
-//   playerFile.delete()
-//   hasBeenSaved should be(true)
-// }
-// it should "load a Player object" in {
-//   val player1 = Player()
-//   player1.save(playerFile)
-//   val player2 = Player()
-//   playerFile.delete()
-//   (player2 == player1) should be(true)
-// }
-
-// "Main" should "create initial player and tasks file" in {
-//   val args = "init"
-//   main(args)
-//   val haveBeenCreated = (playerFile.exists && taskFile.exists)
-//   playerFile.delete()
-//   taskFile.delete()
-//   haveBeenCreated should be(true)
-
-// }
 
     
