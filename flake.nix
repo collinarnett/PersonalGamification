@@ -34,14 +34,12 @@
         defaultPackage = self.packages.${system}.${packageName};
         packages.dockerImage = pkgs.dockerTools.buildLayeredImage {
           name = "${dockerRepository}/${packageName}";
-          config.Entrypoint = [ 
-            "${pkgs.jre_headless}/bin/java" 
+          config.Entrypoint = [
+            "${pkgs.jre_headless}/bin/java"
             "-jar"
             "${build}/bin/${packageName}-assembly-${version}.jar"
           ];
         };
-        
-        devShell =
-          pkgs.mkShell { buildInputs = with pkgs; [ sbt jdk scalafmt ]; };
+        devShell = import ./shell.nix { inherit pkgs; };
       });
 }
