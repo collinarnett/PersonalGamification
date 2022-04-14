@@ -9,8 +9,6 @@ val stateDir = os.Path("/var/lib/pg")
   val config: Config = Parser(args)
   val mapper =
     new YAMLMapper() with ClassTagExtensions
-  println(s"$stateDir - is the current directory")
-  println(os.list(stateDir))
   mapper.registerModule(DefaultScalaModule)
   config.mode match
     case "task add" =>
@@ -26,15 +24,12 @@ val stateDir = os.Path("/var/lib/pg")
         stateDir / fileToDelete.baseName.replace("incomplete", "deleted")
       )
     case "task modify" =>
-      val task = Parser.parseTask(config)
+      val id = config.id
       val fileToModify: os.Path = os
         .list(stateDir)
-        .filter(_.baseName.endsWith("incomplete"))
-        .map(path => (mapper.readValue[Task](path.toIO) -> path))
-        .filter((k, v) => k == task)
-        .map((k, v) => v)
-        .head
-      mapper.writeValue(fileToModify.toIO, task)
+        .filter(_.baseName.endsWith("incomplete"))(id)
+      val oldTask: Task = mapper.readValue[Task](fileToModify.toIO)
+      mapper.writeValue(fileToModify.toIO, oldTask.update(config))
     case "task list" =>
       os.list(stateDir)
         .filter(_.baseName.endsWith("incomplete"))
@@ -50,3 +45,4 @@ val stateDir = os.Path("/var/lib/pg")
         fileToComplete,
         stateDir / fileToComplete.baseName.replace("incomplete", "complete")
       )
+    case _ =>

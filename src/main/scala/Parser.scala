@@ -12,8 +12,14 @@ object Parser:
 
   def parseTask(config: Config): Task =
     Task(
-      config.name,
-      config.effort,
+      config.name match
+        case Some(name) => name
+        case None       => ""
+      ,
+      config.effort match
+        case Some(effort) => effort
+        case None         => 0
+      ,
       config.description match
         case Some(value) => value
         case None        => ""
@@ -37,18 +43,20 @@ object Parser:
         .action((x, c) => c.copy(mode = "task add"))
         .text("Add a task")
         .children(
-          arg[String]("name")
+          opt[String]('n', "name")
             .required()
-            .action((x, c) => c.copy(name = x))
+            .action((x, c) => c.copy(name = Some(x)))
             .text("Name of the task"),
-          arg[Int]("effort")
+          opt[Int]('e', "effort")
             .required()
-            .action((x, c) => c.copy(effort = x))
+            .action((x, c) => c.copy(effort = Some(x)))
             .text("Amount of effort required to complete the task"),
-          arg[String]("description")
+          opt[String]('d', "description")
+            .optional()
             .action((x, c) => c.copy(description = Some(x)))
             .text("Description of the task"),
-          arg[Calendar]("due")
+          opt[Calendar]('D', "due")
+            .optional()
             .action((x, c) => c.copy(due = Some(x)))
             .text("When the task is due.")
         ),
@@ -56,19 +64,53 @@ object Parser:
         .action((x, c) => c.copy(mode = "task delete"))
         .text("Delete a task")
         .children(
-          arg[Int]("id")
+          opt[Int]('i', "id")
+            .required()
             .text("Id of the task to delete")
             .action((x, c) => c.copy(id = x))
+            .validate(x =>
+              if (x >= 0) success
+              else failure("Argument id must be >0")
+            )
         ),
       cmd("list")
         .action((x, c) => c.copy(mode = "task list"))
-        .text("List all tasks")
+        .text("List all tasks"),
+      cmd("modify")
+        .action((x, c) => c.copy(mode = "task modify"))
+        .text("Modify a task")
+        .children(
+          opt[Int]('i', "id")
+            .required()
+            .text("Id of the task to modify")
+            .action((x, c) => c.copy(id = x))
+            .validate(x =>
+              if (x >= 0) success
+              else failure("Argument id must be >0")
+            ),
+          opt[String]('n', "name")
+            .optional()
+            .action((x, c) => c.copy(name = Some(x)))
+            .text("Name of the task"),
+          opt[Int]('e', "effort")
+            .optional()
+            .action((x, c) => c.copy(effort = Some(x)))
+            .text("Amount of effort required to complete the task"),
+          opt[String]('d', "description")
+            .optional()
+            .action((x, c) => c.copy(description = Some(x)))
+            .text("Description of the task"),
+          opt[Calendar]('D', "due")
+            .optional()
+            .action((x, c) => c.copy(due = Some(x)))
+            .text("When the task is due.")
+        )
     )
 
 case class Config(
     mode: String = "None",
-    name: String = "None",
-    effort: Int = 0,
+    name: Option[String] = None,
+    effort: Option[Int] = None,
     description: Option[String] = None,
     due: Option[Calendar] = None,
     id: Int = -1

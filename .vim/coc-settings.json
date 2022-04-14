@@ -2,8 +2,6 @@
 	"coc.preferences.formatOnSaveFiletypes": ["scala"],
 	"metals": {
 		"statusBarEnabled": true,
-		"showInferredType": true,
-		"scalafmtConfigPath": "../.scalafmt.conf"
+		"showInferredType": true
 	}
 }
-
