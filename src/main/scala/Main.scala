@@ -17,19 +17,29 @@ val stateDir = os.Path("/var/lib/pg")
       mapper.writeValue((stateDir / fileName).toIO, task)
     case "task delete" =>
       val id = config.id
-      val fileToDelete =
-        os.list(stateDir).filter(_.baseName.endsWith("incomplete"))(id)
-      os.move(
-        fileToDelete,
-        stateDir / fileToDelete.baseName.replace("incomplete", "deleted")
-      )
+      val fileToDelete: Option[os.Path] =
+        os.list(stateDir).filter(_.baseName.endsWith("incomplete")).lift(id)
+      fileToDelete match
+        case Some(file) =>
+          os.move(
+            file,
+            stateDir / file.baseName.replace("incomplete", "deleted")
+          )
+        case None => println("Error - Task not in list")
     case "task modify" =>
       val id = config.id
-      val fileToModify: os.Path = os
+      val fileToModify: Option[os.Path] = os
         .list(stateDir)
-        .filter(_.baseName.endsWith("incomplete"))(id)
-      val oldTask: Task = mapper.readValue[Task](fileToModify.toIO)
-      mapper.writeValue(fileToModify.toIO, oldTask.update(config))
+        .filter(_.baseName.endsWith("incomplete"))
+        .lift(id)
+      fileToModify match
+        case Some(file) =>
+          val oldTask: Task = mapper.readValue[Task](file.toIO)
+          mapper.writeValue(
+            file.toIO,
+            oldTask.update(config)
+          )
+        case None => println("Error - Task not in list")
     case "task list" =>
       os.list(stateDir)
         .filter(_.baseName.endsWith("incomplete"))
@@ -37,12 +47,18 @@ val stateDir = os.Path("/var/lib/pg")
         .foreach((path, index) =>
           println(s"$index - ${mapper.readValue[Task](path.toIO).name}")
         )
+    //TODO Get working
     case "task complete" =>
       val id = config.id
-      val fileToComplete =
-        os.list(stateDir).filter(_.baseName.endsWith("incomplete"))(id)
-      os.move(
-        fileToComplete,
-        stateDir / fileToComplete.baseName.replace("incomplete", "complete")
-      )
+      val fileToComplete: Option[os.Path] =
+        os.list(stateDir)
+          .filter(_.baseName.endsWith("incomplete"))
+          .lift(id)
+      fileToComplete match
+        case Some(file) =>
+          os.move(
+            file,
+            stateDir / file.baseName.replace("incomplete", "complete")
+          )
+        case None => println("Error - Task not in list")
     case _ =>
