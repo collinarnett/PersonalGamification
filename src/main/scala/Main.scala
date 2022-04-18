@@ -25,7 +25,9 @@ val stateDir = os.Path("/var/lib/pg")
             file,
             stateDir / file.baseName.replace("incomplete", "deleted")
           )
-        case None => println("Error - Task not in list")
+        case None =>
+          System.err.println("Error - Task not in list")
+          System.exit(1)
     case "task modify" =>
       val id = config.id
       val fileToModify: Option[os.Path] = os
@@ -39,7 +41,9 @@ val stateDir = os.Path("/var/lib/pg")
             file.toIO,
             oldTask.update(config)
           )
-        case None => println("Error - Task not in list")
+        case None =>
+          System.err.println("Error - Task not in list")
+          System.exit(1)
     case "task list" =>
       os.list(stateDir)
         .filter(_.baseName.endsWith("incomplete"))
@@ -60,5 +64,8 @@ val stateDir = os.Path("/var/lib/pg")
             file,
             stateDir / file.baseName.replace("incomplete", "complete")
           )
-        case None => println("Error - Task not in list")
-    case _ =>
+        case None =>
+          System.err.println("Error - Task not in list")
+          System.exit(1)
+    case _ => System.exit(0)
+  System.exit(0)
