@@ -12,12 +12,12 @@ import java.util.Calendar
 import java.util.Date
 
 case class AbilityScores(
-    strength: Int = 0,
-    dexterity: Int = 0,
-    constitution: Int = 0,
-    intelligence: Int = 0,
-    wisdom: Int = 0,
-    charisma: Int = 0
+    strength: Float = 0,
+    dexterity: Float = 0,
+    constitution: Float = 0,
+    intelligence: Float = 0,
+    wisdom: Float = 0,
+    charisma: Float = 0
 ) {
 
   def +(abilityScores: AbilityScores): AbilityScores =
@@ -51,27 +51,21 @@ case class AbilityScores(
     |charisma    : $charisma""".stripMargin
 }
 
-sealed trait GameObject {
-  private val mapper =
-    new YAMLMapper() with ClassTagExtensions
-  mapper.registerModule(DefaultScalaModule)
-  def save(file: File): Unit =
-    if file.exists then
-      println(
-        s"File already exists at ${file.getCanonicalPath}. Would you like to overwrite it? (Y/y or N/n)"
-      )
-      mapper.writeValue(file, this)
-}
-
 case class Player(
     name: String = "Player",
     level: Int = 0,
     exp: Float = 0.0,
+    items: Seq[Items],
     health: Int = 100,
     val abilityScores: AbilityScores = AbilityScores()
 ) extends GameObject {
-  def completeTask(exp: Float): Player =
-    Player(name, level, this.exp + exp, health, abilityScores)
+  def ++(outcome: Outcome): Player =
+    Player(
+      name,
+      exp + outcome.exp,
+      items ++ outcome.items,
+      health ++ outcome.health
+    )
 
   def string: String =
     s"""------ Player -------

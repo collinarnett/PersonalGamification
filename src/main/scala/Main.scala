@@ -60,10 +60,13 @@ val stateDir = os.Path("/var/lib/pg")
           .lift(id)
       fileToComplete match
         case Some(file) =>
-          os.move(
-            file,
-            stateDir / file.baseName.replace("incomplete", "complete")
-          )
+          // Trigger Event
+          val task: Task = mapper.readValue[Task](file.toIO)
+          val outcome =
+            os.move(
+              file,
+              stateDir / file.baseName.replace("incomplete", "complete")
+            )
         case None =>
           System.err.println("Error - Task not in list")
           System.exit(1)
