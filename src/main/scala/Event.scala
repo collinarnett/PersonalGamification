@@ -1,7 +1,7 @@
 case class Event(
     monsters: Seq[Monster],
     items: Seq[Item],
-    experience: Float,
+    exp: Float,
     health: Int,
     statusEffects: Seq[StatusEffect]
 )
