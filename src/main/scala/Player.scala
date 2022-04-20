@@ -1,16 +1,3 @@
-import com.fasterxml.jackson.module.scala.DefaultScalaModule
-import com.fasterxml.jackson.dataformat.yaml.YAMLMapper
-import java.io.File
-import scala.io.StdIn.{readChar, readInt}
-import java.io.{FileNotFoundException, IOException}
-import scala.util.{Try, Success, Random}
-import com.fasterxml.jackson.core.`type`.TypeReference
-import com.fasterxml.jackson.module.scala.ClassTagExtensions
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
-import java.util.Calendar
-import java.util.Date
-
 case class AbilityScores(
     strength: Float = 0,
     dexterity: Float = 0,
@@ -53,27 +40,27 @@ case class AbilityScores(
 
 case class Player(
     name: String = "Player",
-    level: Int = 0,
     exp: Float = 0.0,
     items: Seq[Items],
+    statusEffects: Seq[StatusEffect],
     health: Int = 100,
-    val abilityScores: AbilityScores = AbilityScores()
-) extends GameObject {
+    abilityScores: AbilityScores = AbilityScores()
+):
   def ++(outcome: Outcome): Player =
     Player(
       name,
       exp + outcome.exp,
       items ++ outcome.items,
-      health ++ outcome.health
+      statusEffects ++ outcome.statusEffects,
+      health ++ outcome.health,
+      abilityScores
     )
 
   def string: String =
     s"""------ Player -------
     |name   : $name
-    |level  : $level
     |exp    : ${exp * 100}%
     |health : ($health/100)
     |--- Ability Scores --
     |${abilityScores.string}
     |""".stripMargin
-}
