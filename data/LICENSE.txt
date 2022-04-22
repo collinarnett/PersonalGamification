@@ -1,0 +1,2 @@
+All files listed below this directory are licensed under the the Creative Commons Attribution-ShareAlike 3.0 Unported License. To view a copy of this license, visit http://creativecommons.org/licenses/by-sa/3.0/ or send a letter to Creative Commons, 444 Castro Street, Suite 900, Mountain View, California, 94041, USA.
+Files in the folder "monsters" are attributed to Cataclysm: Dark Days Ahead, https://cataclysmdda.org/. Contributors for the Cataclysm project can be found at https://github.com/CleverRaven/Cataclysm-DDA/graphs/contributors

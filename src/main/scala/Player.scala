@@ -39,10 +39,10 @@ case class AbilityScores(
 }
 
 case class Player(
-    name: String = "Player",
+    name: String,
     exp: Float = 0.0,
-    items: Seq[Items],
-    statusEffects: Seq[StatusEffect],
+    items: Seq[Items] = Seq(),
+    statusEffects: Seq[StatusEffect] = Seq(),
     health: Int = 100,
     abilityScores: AbilityScores = AbilityScores()
 ):

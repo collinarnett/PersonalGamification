@@ -58,7 +58,7 @@ object Parser:
           opt[Calendar]('D', "due")
             .optional()
             .action((x, c) => c.copy(due = Some(x)))
-            .text("When the task is due.")
+            .text("When the task is due")
         ),
       cmd("delete")
         .action((x, c) => c.copy(mode = "task delete"))
@@ -103,7 +103,16 @@ object Parser:
           opt[Calendar]('D', "due")
             .optional()
             .action((x, c) => c.copy(due = Some(x)))
-            .text("When the task is due.")
+            .text("When the task is due")
+        ),
+      cmd("player")
+        .action((x, c) => c.copy(mode = "player add"))
+        .text("Add a player")
+        .children(
+          opt[String]('n', "name")
+            .required()
+            .action((x, c) => c.copy(player = x))
+            .text("The name of your player")
         )
     )
 
@@ -113,5 +122,6 @@ case class Config(
     effort: Option[Int] = None,
     description: Option[String] = None,
     due: Option[Calendar] = None,
-    id: Int = -1
+    id: Int = -1,
+    player: String = "Player"
 )
