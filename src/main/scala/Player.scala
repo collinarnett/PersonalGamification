@@ -26,7 +26,7 @@ case class AbilityScores(
       charisma - abilityScores.charisma
     )
 
-  def sum: Int =
+  def sum: Float =
     strength + dexterity + constitution + intelligence + wisdom + charisma
 
   def string =
@@ -41,7 +41,7 @@ case class AbilityScores(
 case class Player(
     name: String,
     exp: Float = 0.0,
-    items: Seq[Items] = Seq(),
+    items: Seq[Item] = Seq(),
     statusEffects: Seq[StatusEffect] = Seq(),
     health: Int = 100,
     abilityScores: AbilityScores = AbilityScores()
@@ -52,7 +52,7 @@ case class Player(
       exp + outcome.exp,
       items ++ outcome.items,
       statusEffects ++ outcome.statusEffects,
-      health ++ outcome.health,
+      health + outcome.health,
       abilityScores
     )
 

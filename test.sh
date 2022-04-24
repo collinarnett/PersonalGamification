@@ -3,7 +3,7 @@ RED='\033[0;31m'
 GREEN='\033[0;32m'
 NOCOLOR='\033[0m'
 clean() {
-	rm -f $TESTDIR/*
+	rm -f $TESTDIR/*.yaml
 }
 assert() {
 	RESULT=$?
@@ -86,5 +86,14 @@ echo "Delete - Test 2"
 # Delete task - fail
 pg delete -i 1
 assert "fail"
-# Clean
-clean
+
+# Player Add
+echo "Player - Test 1"
+pg player -n "collin"
+assert "succeed"
+
+# Task complete
+echo "Task - Test 3"
+pg add -n "hello" -e 12 -D "2022-05-01"
+pg complete -i 0
+assert "succeed"

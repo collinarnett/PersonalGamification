@@ -1,0 +1,5 @@
+---
+name: "Broken Glass"
+description: "A shards of broken glass that can cut and injure someone."
+affect: -1
+lifetime: 1677628800000

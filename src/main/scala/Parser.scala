@@ -105,6 +105,19 @@ object Parser:
             .action((x, c) => c.copy(due = Some(x)))
             .text("When the task is due")
         ),
+      cmd("complete")
+        .action((x, c) => c.copy(mode = "task complete"))
+        .text("Complete a task")
+        .children(
+          opt[Int]('i', "id")
+            .required()
+            .text("Id of the task to complete")
+            .action((x, c) => c.copy(id = x))
+            .validate(x =>
+              if (x >= 0) success
+              else failure("Argument id must be >0")
+            )
+        ),
       cmd("player")
         .action((x, c) => c.copy(mode = "player add"))
         .text("Add a player")

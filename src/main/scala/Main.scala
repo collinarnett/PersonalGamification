@@ -4,25 +4,30 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLMapper
 import com.fasterxml.jackson.module.scala.ClassTagExtensions
 import java.util.{Locale, Calendar, GregorianCalendar}
 import java.text.SimpleDateFormat
+
 val stateDir = os.Path("/var/lib/pg")
 
 @main def main(args: String*) =
   val config: Config = Parser(args)
   val mapper =
     new YAMLMapper() with ClassTagExtensions
+  mapper.registerModule(DefaultScalaModule)
+  val r = scala.util.Random
 
   // Try to load assets
-  val monsters: Seq[Monster] = os.list((stateDir / "monsters").mkdir.all)
+  val monsters: Seq[Monster] =
+    os.makeDir.all(stateDir / "monsters")
+    os.list(stateDir / "monsters")
+      .map(m => mapper.readValue[Monster](m.toIO))
   val items: Seq[Item] =
-    os.list(
-      (stateDir / "items").mkdir.all
-    )
+    os.makeDir.all(stateDir / "items")
+    os.list(stateDir / "items")
+      .map(i => mapper.readValue[Item](i.toIO))
   val statusEffects: Seq[StatusEffect] =
-    os.list(
-      (stateDir / "status_effects").mkdir.all
-    )
+    os.makeDir.all(stateDir / "status_effects")
+    os.list(stateDir / "status_effects")
+      .map(s => mapper.readValue[StatusEffect](s.toIO))
 
-  mapper.registerModule(DefaultScalaModule)
   config.mode match
     case "player add" =>
       val player = Player(name = config.player)
@@ -40,7 +45,7 @@ val stateDir = os.Path("/var/lib/pg")
         case Some(file) =>
           os.move(
             file,
-            stateDir / file.baseName.replace("incomplete", "deleted")
+            stateDir / file.baseName.replace("incomplete", "deleted.yaml")
           )
         case None =>
           System.err.println("Error - Task not in list")
@@ -69,46 +74,59 @@ val stateDir = os.Path("/var/lib/pg")
           println(s"$index - ${mapper.readValue[Task](path.toIO).name}")
         )
     case "task complete" =>
+      // Task we want to complete
       val id = config.id
-      val player: Player =
-        mapper.readValue[Player](
-          os.list(stateDir)
-            .filter(_.baseName.endsWith("player"))
-            .lift(0)
-            .getOrElse(
-              {
-                System.err.println("Error - player file not found")
-                System.exit(1)
-              }
-            )
-            .toIO
-        )
-
-      val fileToComplete: Option[os.Path] =
+      // Load Player
+      val playerFile: os.Path =
+        os.list(stateDir)
+          .filter(_.baseName.endsWith("player"))
+          .lift(0)
+          .getOrElse(
+            {
+              System.err.println("Error - player file not found")
+              System.exit(1).asInstanceOf[Nothing]
+            }
+          )
+      val player = mapper.readValue[Player](
+        playerFile.toIO
+      )
+      // TODO Refactor `asInstanceOf` into option handling
+      val fileToComplete: os.Path =
         os.list(stateDir)
           .filter(_.baseName.endsWith("incomplete"))
           .lift(id)
-      fileToComplete match
-        case Some(file) =>
-          // Trigger Event
-          val task: Task = mapper.readValue[Task](file.toIO)
-          val timeDiff: Long =
-            task.due.getTimeInMillis - Calendar.getInstance.getTimeInMillis
-          val outcome =
-            timeDiff match
-              case _ <= 0 =>
-                player + Outcome.punishment(???)
-              case _ > 0 =>
-                player + Outcome.reward(???)
-          mapper.writeValue(
-            player
+          .getOrElse(
+            {
+              System.err.println("Error - player file not found")
+              System.exit(1).asInstanceOf[Nothing]
+            }
           )
-          os.move(
-            file,
-            stateDir / file.baseName.replace("incomplete", "complete")
-          )
-        case None =>
-          System.err.println("Error - Task not in list")
-          System.exit(1)
+      val updatedPlayer: Player =
+        // Generate Event
+        val event = Event(
+          monsters,
+          items,
+          r.nextFloat,
+          r.nextInt(10),
+          statusEffects
+        )
+        // Load the task
+        val task: Task = mapper.readValue[Task](fileToComplete.toIO)
+        // Check if task has expired
+        val timeDiff: Long =
+          task.due.getTimeInMillis - Calendar.getInstance.getTimeInMillis
+        timeDiff match
+          case x if x <= 0 =>
+            // Punish if expired
+            player ++ Outcome.punishment(event, task.effort)
+          case x if x > 0 =>
+            // Reward if not expired
+            player ++ Outcome.reward(event, task.effort)
+      mapper.writeValue(playerFile.toIO, updatedPlayer)
+      os.move(
+        fileToComplete,
+        stateDir / fileToComplete.baseName.replace("incomplete", "complete")
+      )
+
     case _ => System.exit(0)
   System.exit(0)
