@@ -27,7 +27,6 @@ val stateDir = os.Path("/var/lib/pg")
     os.makeDir.all(stateDir / "status_effects")
     os.list(stateDir / "status_effects")
       .map(s => mapper.readValue[StatusEffect](s.toIO))
-
   config.mode match
     case "player add" =>
       val player = Player(name = config.player)
@@ -118,10 +117,12 @@ val stateDir = os.Path("/var/lib/pg")
         timeDiff match
           case x if x <= 0 =>
             // Punish if expired
-            player ++ Outcome.punishment(event, task.effort)
+            val outcome = Outcome.punishment(event, task.effort)
+            player ++ outcome
           case x if x > 0 =>
             // Reward if not expired
-            player ++ Outcome.reward(event, task.effort)
+            val outcome = Outcome.reward(event, task.effort)
+            player ++ outcome
       mapper.writeValue(playerFile.toIO, updatedPlayer)
       os.move(
         fileToComplete,

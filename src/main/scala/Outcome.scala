@@ -16,13 +16,18 @@ object Outcome:
       health = round(Random.nextFloat * effort * event.health),
       exp = Random.nextFloat * effort * event.exp,
       items = event.items.size match
-        case x if x > 0 =>
-          choice(event.items, Random.nextInt(x))
+        case x if x == 1 => event.items
+        case x if x > 1 =>
+          val outcome = choice(event.items, Random.between(1, x))
+          outcome
         case _ => Seq()
       ,
       statusEffects = positiveStats.size match
-        case x if x > 0 =>
-          choice(positiveStats, Random.nextInt(positiveStats.size))
+        case x if x == 1 => positiveStats
+        case x if x > 1 =>
+          val outcome =
+            choice(positiveStats, Random.between(1, x))
+          outcome
         case _ => Seq()
     )
 
@@ -33,11 +38,13 @@ object Outcome:
       health = round(Random.nextFloat * effort * -event.health),
       exp = Random.nextFloat * -event.exp,
       items = Seq(),
-      statusEffects = choice(negativeStats, Random.nextInt(negativeStats.size))
+      statusEffects =
+        choice(negativeStats, Random.between(1, negativeStats.size))
     )
 
   private def choice[T](items: Seq[T], n: Int, acc: Seq[T] = Seq()): Seq[T] =
-    items match
-      case head :: tail => choice(Random.shuffle(tail), n - 1, acc :+ head)
-      case x if n == 0  => acc
-      case _            => acc
+    Random.shuffle(items) match
+      case x if n == 0 => acc
+      case head +: tail =>
+        choice(Random.shuffle(tail), n - 1, acc :+ head)
+      case _ => acc

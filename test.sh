@@ -5,6 +5,8 @@ NOCOLOR='\033[0m'
 clean() {
 	rm -f $TESTDIR/*.yaml
 }
+trap "rm -f $TESTDIR/*.yaml" EXIT
+
 assert() {
 	RESULT=$?
 	if [ "$1" = "fail" ] && [ $RESULT -eq 1 ]
