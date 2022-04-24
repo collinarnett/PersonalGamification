@@ -1,21 +1,10 @@
-import com.fasterxml.jackson.module.scala.DefaultScalaModule
-import com.fasterxml.jackson.dataformat.yaml.YAMLMapper
-import java.io.File
-import scala.io.StdIn.{readChar, readInt}
-import java.io.{FileNotFoundException, IOException}
-import scala.util.{Try, Success, Random}
-import com.fasterxml.jackson.core.`type`.TypeReference
-import com.fasterxml.jackson.module.scala.ClassTagExtensions
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
-
 case class AbilityScores(
-    strength: Int = 0,
-    dexterity: Int = 0,
-    constitution: Int = 0,
-    intelligence: Int = 0,
-    wisdom: Int = 0,
-    charisma: Int = 0
+    strength: Float = 0,
+    dexterity: Float = 0,
+    constitution: Float = 0,
+    intelligence: Float = 0,
+    wisdom: Float = 0,
+    charisma: Float = 0
 ) {
 
   def +(abilityScores: AbilityScores): AbilityScores =
@@ -37,7 +26,7 @@ case class AbilityScores(
       charisma - abilityScores.charisma
     )
 
-  def sum: Int =
+  def sum: Float =
     strength + dexterity + constitution + intelligence + wisdom + charisma
 
   def string =
@@ -49,43 +38,29 @@ case class AbilityScores(
     |charisma    : $charisma""".stripMargin
 }
 
-sealed trait GameObject {
-  private val mapper =
-    new YAMLMapper() with ClassTagExtensions
-  mapper.registerModule(DefaultScalaModule)
-  def save(file: File): Unit =
-    if file.exists then
-      println(
-        s"File already exists at ${file.getCanonicalPath}. Would you like to overwrite it? (Y/y or N/n)"
-      )
-      mapper.writeValue(file, this)
-}
-
-case class Task(
-    name: String = "",
-    description: String = "",
-    dueDate: String = "",
-    difficulty: Int = 0,
-    abilityScores: AbilityScores = AbilityScores()
-)
-
 case class Player(
-    name: String = "Player",
-    level: Int = 0,
+    name: String,
     exp: Float = 0.0,
+    items: Seq[Item] = Seq(),
+    statusEffects: Seq[StatusEffect] = Seq(),
     health: Int = 100,
-    val abilityScores: AbilityScores = AbilityScores()
-) extends GameObject {
-  def completeTask(exp: Float): Player =
-    Player(name, level, this.exp + exp, health, abilityScores)
+    abilityScores: AbilityScores = AbilityScores()
+):
+  def ++(outcome: Outcome): Player =
+    Player(
+      name,
+      exp + outcome.exp,
+      items ++ outcome.items,
+      statusEffects ++ outcome.statusEffects,
+      health + outcome.health,
+      abilityScores
+    )
 
   def string: String =
     s"""------ Player -------
     |name   : $name
-    |level  : $level
     |exp    : ${exp * 100}%
     |health : ($health/100)
     |--- Ability Scores --
     |${abilityScores.string}
     |""".stripMargin
-}

@@ -58,3 +58,4 @@ tasks.yaml
 out/
 .direnv
 /result
+/test
