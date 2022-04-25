@@ -14,7 +14,7 @@
         };
         packageName = "PersonalGamification";
         dockerRepository = "collinarnett";
-        version = "0.1.0";
+        version = "0.0.1";
         build = pkgs.sbt.mkDerivation {
           pname = "${packageName}";
           version = "${version}";
@@ -30,7 +30,8 @@
         };
         openjdk = pkgs.dockerTools.pullImage {
           imageName = "openjdk";
-          imageDigest = "sha256:afbe5f6d76c1eedbbd2f689c18c1984fd67121b369fc0fbd51c510caf4f9544f";
+          imageDigest =
+            "sha256:afbe5f6d76c1eedbbd2f689c18c1984fd67121b369fc0fbd51c510caf4f9544f";
           sha256 = "sha256-VVsu0mFM1mDu1P+osJC7Inpm1FIZb5o7Q7idp5ogRP0=";
         };
       in {
