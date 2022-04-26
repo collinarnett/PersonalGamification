@@ -8,3 +8,11 @@ case class Task(name: String, effort: Int, description: String, due: Calendar):
       config.description.getOrElse(this.description),
       config.due.getOrElse(this.due)
     )
+
+  def string: String =
+    s"""------ Task -------
+    |name   : $name
+    |effort    : $effort
+    |description : $description
+    |due    : ${due.toString}
+    |""".stripMargin
