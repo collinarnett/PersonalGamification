@@ -52,3 +52,10 @@ website/.cache-loader
 project/metals.sbt
 coursier
 .vscode
+*.pyz
+player.yaml
+tasks.yaml
+out/
+.direnv
+/result
+/test

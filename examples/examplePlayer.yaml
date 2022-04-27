@@ -1,0 +1,13 @@
+---
+file: "/home/collin/PersonalGamification/player.yaml"
+name: "Player"
+level: 0
+exp: 0.0
+health: 100
+abilityScores:
+  strength: 0
+  dexterity: 0
+  constitution: 0
+  intelligence: 0
+  wisdom: 0
+  charisma: 0
