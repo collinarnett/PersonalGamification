@@ -29,15 +29,19 @@ val stateDir = os.Path("/var/lib/pg")
       .map(s => mapper.readValue[StatusEffect](s.toIO))
   config.mode match
     case "player add" =>
+      println(s"Creating player ${config.player}")
       val player = Player(name = config.player)
+      println(player)
       val fileName = s"${randomUUID()}_player.yaml"
       mapper.writeValue((stateDir / fileName).toIO, player)
     case "task add" =>
       val task = Parser.parseTask(config)
+      println(s"Adding task \"${config.name.get}\"")
       val fileName = s"${randomUUID()}_incomplete.yaml"
       mapper.writeValue((stateDir / fileName).toIO, task)
     case "task delete" =>
       val id = config.id
+      println(s"Deleting task id ${config.id}")
       val fileToDelete: Option[os.Path] =
         os.list(stateDir).filter(_.baseName.endsWith("incomplete")).lift(id)
       fileToDelete match
@@ -51,6 +55,7 @@ val stateDir = os.Path("/var/lib/pg")
           System.exit(1)
     case "task modify" =>
       val id = config.id
+      println(s"Modifying task id ${config.id}")
       val fileToModify: Option[os.Path] = os
         .list(stateDir)
         .filter(_.baseName.endsWith("incomplete"))
@@ -58,14 +63,20 @@ val stateDir = os.Path("/var/lib/pg")
       fileToModify match
         case Some(file) =>
           val oldTask: Task = mapper.readValue[Task](file.toIO)
+          println("Task being modified...")
+          println(oldTask)
+          val newTask = oldTask.update(config)
+          println("Updated task...")
+          println(newTask)
           mapper.writeValue(
             file.toIO,
-            oldTask.update(config)
+            newTask
           )
         case None =>
           System.err.println("Error - Task not in list")
           System.exit(1)
     case "task list" =>
+      println("-- Tasks --")
       os.list(stateDir)
         .filter(_.baseName.endsWith("incomplete"))
         .zipWithIndex
@@ -75,6 +86,7 @@ val stateDir = os.Path("/var/lib/pg")
     case "task complete" =>
       // Task we want to complete
       val id = config.id
+      println(s"Task being completed $id")
       // Load Player
       val playerFile: os.Path =
         os.list(stateDir)
@@ -96,7 +108,7 @@ val stateDir = os.Path("/var/lib/pg")
           .lift(id)
           .getOrElse(
             {
-              System.err.println("Error - player file not found")
+              System.err.println("Error - task file not found")
               System.exit(1).asInstanceOf[Nothing]
             }
           )
@@ -117,12 +129,15 @@ val stateDir = os.Path("/var/lib/pg")
         timeDiff match
           case x if x <= 0 =>
             // Punish if expired
+            println("Oh no! Your task has expired")
             val outcome = Outcome.punishment(event, task.effort)
             player ++ outcome
           case x if x > 0 =>
             // Reward if not expired
+            println("Here are your rewards")
             val outcome = Outcome.reward(event, task.effort)
             player ++ outcome
+      println(player)
       mapper.writeValue(playerFile.toIO, updatedPlayer)
       os.move(
         fileToComplete,

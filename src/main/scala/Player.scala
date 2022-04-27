@@ -50,17 +50,21 @@ case class Player(
     Player(
       name,
       exp + outcome.exp,
-      items ++ outcome.items,
-      statusEffects ++ outcome.statusEffects,
+      (items ++ outcome.items).distinct,
+      (statusEffects ++ outcome.statusEffects).distinct,
       health + outcome.health,
       abilityScores
     )
 
-  def string: String =
+  override def toString: String =
     s"""------ Player -------
     |name   : $name
-    |exp    : ${exp * 100}%
-    |health : ($health/100)
+    |exp    : ${exp * 10}%
+    |health : $health
     |--- Ability Scores --
     |${abilityScores.string}
+    |------ Items --------
+    |${items.foldLeft("")(_ + "\n" + _)}
+    |--- Status Effects --
+    |${statusEffects.foldLeft("")(_ + "\n" + _)}
     |""".stripMargin

@@ -36,7 +36,7 @@ object Parser:
       programName("pg"),
       head(
         "pg",
-        "0.1.0",
+        "0.0.1",
         "https://github.com/collinarnett/PersonalGamification"
       ),
       cmd("add")
@@ -45,20 +45,24 @@ object Parser:
         .children(
           opt[String]('n', "name")
             .required()
+            .valueName("<str>")
             .action((x, c) => c.copy(name = Some(x)))
             .text("Name of the task"),
           opt[Int]('e', "effort")
             .required()
+            .valueName("<int>")
             .action((x, c) => c.copy(effort = Some(x)))
-            .text("Amount of effort required to complete the task"),
+            .text("Amount of effort required to complete the task, eg. 2"),
           opt[String]('d', "description")
             .optional()
+            .valueName("<str>")
             .action((x, c) => c.copy(description = Some(x)))
-            .text("Description of the task"),
+            .text("Description of the task, eg. \"Wash the dishes\""),
           opt[Calendar]('D', "due")
             .optional()
+            .valueName("YYYY-MM-DD")
             .action((x, c) => c.copy(due = Some(x)))
-            .text("When the task is due")
+            .text("When the task is due, eg. 2022-12-31")
         ),
       cmd("delete")
         .action((x, c) => c.copy(mode = "task delete"))
@@ -66,7 +70,8 @@ object Parser:
         .children(
           opt[Int]('i', "id")
             .required()
-            .text("Id of the task to delete")
+            .valueName("<int>")
+            .text("Id of the task to delete. Use \"list\" to display IDs")
             .action((x, c) => c.copy(id = x))
             .validate(x =>
               if (x >= 0) success
@@ -82,7 +87,8 @@ object Parser:
         .children(
           opt[Int]('i', "id")
             .required()
-            .text("Id of the task to modify")
+            .valueName("<int>")
+            .text("Id of the task to modify. Use \"list\" to display IDs")
             .action((x, c) => c.copy(id = x))
             .validate(x =>
               if (x >= 0) success
@@ -90,20 +96,24 @@ object Parser:
             ),
           opt[String]('n', "name")
             .optional()
+            .valueName("<str>")
             .action((x, c) => c.copy(name = Some(x)))
             .text("Name of the task"),
           opt[Int]('e', "effort")
             .optional()
+            .valueName("<int>")
             .action((x, c) => c.copy(effort = Some(x)))
-            .text("Amount of effort required to complete the task"),
+            .text("Amount of effort required to complete the task, eg. 2"),
           opt[String]('d', "description")
             .optional()
+            .valueName("<str>")
             .action((x, c) => c.copy(description = Some(x)))
-            .text("Description of the task"),
+            .text("Description of the task, eg. \"Wash the dishes\""),
           opt[Calendar]('D', "due")
             .optional()
+            .valueName("YYYY-MM-DD")
             .action((x, c) => c.copy(due = Some(x)))
-            .text("When the task is due")
+            .text("When the task is due, eg 2022-12-31")
         ),
       cmd("complete")
         .action((x, c) => c.copy(mode = "task complete"))
@@ -111,7 +121,8 @@ object Parser:
         .children(
           opt[Int]('i', "id")
             .required()
-            .text("Id of the task to complete")
+            .valueName("<int>")
+            .text("Id of the task to complete. Use \"list\" to display IDs")
             .action((x, c) => c.copy(id = x))
             .validate(x =>
               if (x >= 0) success
@@ -124,9 +135,11 @@ object Parser:
         .children(
           opt[String]('n', "name")
             .required()
+            .valueName("<str>")
             .action((x, c) => c.copy(player = x))
             .text("The name of your player")
-        )
+        ),
+      help("help").text("prints this usage text")
     )
 
 case class Config(
