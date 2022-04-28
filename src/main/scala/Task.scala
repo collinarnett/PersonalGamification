@@ -1,4 +1,5 @@
 import java.util.Calendar
+import java.text.SimpleDateFormat
 
 case class Task(name: String, effort: Int, description: String, due: Calendar):
   def update(config: Config): Task =
@@ -13,6 +14,6 @@ case class Task(name: String, effort: Int, description: String, due: Calendar):
     |Name   :  $name
     |Effort :   $effort
     |Description :  $description
-    |Due    :  $due
+    |Due    : ${SimpleDateFormat("MMMM-YYYY").format(due.getTime())} 
     ------------------------
     """.stripMargin
