@@ -1,6 +1,5 @@
 import scala.util.Random
 import scala.math._
-import scala.collection.IterableFactory
 
 case class Outcome(
     health: Int,

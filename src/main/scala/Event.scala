@@ -1,5 +1,3 @@
-import scala.collection.IterableFactory
-
 case class Event(
     monsters: Seq[Monster],
     items: Seq[Item],
