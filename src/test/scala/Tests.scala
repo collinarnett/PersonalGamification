@@ -1082,7 +1082,7 @@ class PersonalGamificationSpec extends AnyFlatSpec:
         )
 
         val timeDiff: Long =
-          task3.due.getTimeInMillis - Calendar.getInstance.getTimeInMillis
+          task2.due.getTimeInMillis - Calendar.getInstance.getTimeInMillis
         timeDiff match
           case x if x <= 0 =>
             // Punish if expired
@@ -1094,9 +1094,8 @@ class PersonalGamificationSpec extends AnyFlatSpec:
             newPlayer ++ outcome
 
       assert(updatedPlayer.health <= newPlayer.health)
-      assert(updatedPlayer.statusEffects.last.affect >= 0)
-      assert(!updatedPlayer.items.isEmpty)
-      assert(!updatedPlayer.statusEffects.isEmpty)
+      assert(updatedPlayer.items.isEmpty)
+      assert(updatedPlayer.statusEffects.isEmpty)
   }
 
   it should "See if the task has expired, and call the correct funtion (3)" in{
