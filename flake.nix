@@ -7,15 +7,12 @@
   };
   outputs = { self, nixpkgs, flake-utils, sbt-derivation }@inputs:
     flake-utils.lib.eachDefaultSystem (system:
-      let
-        pkgs = import nixpkgs {
-          inherit system;
-          overlays = [ sbt-derivation.overlay ];
-        };
+    let
+      pkgs = nixpkgs.legacyPackages.${system};
         packageName = "PersonalGamification";
         dockerRepository = "collinarnett";
         version = "0.0.1";
-        build = pkgs.sbt.mkDerivation {
+        build = sbt-derivation.mkSbtDerivation {
           pname = "${packageName}";
           version = "${version}";
           depsSha256 = "sha256-xB/bRnwusQ1XJ/dxmKPUXRXw0Hb16l2gquFphhNN1Fc=";
