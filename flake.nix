@@ -19,7 +19,7 @@
     build = sbt.mkSbtDerivation.${system} {
       pname = "${packageName}";
       version = "${version}";
-      depsSha256 = "sha256-xB/bRnwusQ1XJ/dxmKPUXRXw0Hb16l2gquFphhNN1Fc=";
+      depsSha256 = "sha256-ZMqRgQueCFwqieLrJw9y8pWYDxKNHTK23vlYJUGT+RQ=";
       src = ./.;
       buildPhase = ''
         sbt assembly
