@@ -64,10 +64,10 @@
       "inputs": {
         "flake-utils": "flake-utils",
         "nixpkgs": "nixpkgs",
-        "sbt-derivation": "sbt-derivation"
+        "sbt": "sbt"
       }
     },
-    "sbt-derivation": {
+    "sbt": {
       "inputs": {
         "flake-utils": "flake-utils_2",
         "nixpkgs": "nixpkgs_2"
